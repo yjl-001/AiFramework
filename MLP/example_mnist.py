@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 # 解决matplotlib中文显示问题
-plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']  # 指定默认字体
-plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
+# plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']  # 指定默认字体
+# plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
 
 # 从 src 包中导入 MLPAPI 类以及数据准备和划分的辅助函数
 from src.api import MLPAPI, prepare_data_for_classification
@@ -56,17 +56,17 @@ if __name__ == '__main__':
         # 绘制训练历史 (损失和准确率)
         plt.figure(figsize=(12, 5))
         plt.subplot(1, 2, 1)
-        plt.plot(history_mnist['loss'], label='训练损失')
-        plt.title('MNIST训练损失')
+        plt.plot(history_mnist['loss'], label='training loss')
+        plt.title('MNIST Training Loss')
         plt.xlabel('Epoch')
-        plt.ylabel('损失')
+        plt.ylabel('loss')
         plt.legend()
 
         plt.subplot(1, 2, 2)
-        plt.plot(history_mnist['accuracy'], label='训练准确率')
-        plt.title('MNIST训练准确率')
+        plt.plot(history_mnist['accuracy'], label='training accuracy')
+        plt.title('MNIST Training Accuracy')
         plt.xlabel('Epoch')
-        plt.ylabel('准确率')
+        plt.ylabel('accuracy')
         plt.legend()
 
         # 创建结果目录 (如果不存在)
@@ -91,9 +91,9 @@ if __name__ == '__main__':
         for i in range(num_samples_to_show):
             plt.subplot(1, num_samples_to_show, i + 1)
             plt.imshow(sample_images[i], cmap='gray')
-            plt.title(f"真实: {true_labels[i]}\n预测: {predicted_labels[i]}")
+            plt.title(f"True: {true_labels[i]}\nPred: {predicted_labels[i]}")
             plt.axis('off')
-        plt.suptitle('MNIST预测结果示例')
+        plt.suptitle('MNIST Pred Result Examples')
 
         # 确保结果目录存在 (通常在前面已创建)
         output_dir = 'result'
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
         # 模型保存
         save_path_mnist = 'mnist_mlp_model.npy'
-        mlp_mnist.save_model(save_path_mnist)
+        mlp_mnist.save_model(os.path.join(output_dir, save_path_mnist))
         print(f"MNIST模型已保存到 {save_path_mnist}")
 
         # 模型加载示例 (可选, 用于验证)

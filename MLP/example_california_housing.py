@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 # 解决matplotlib中文显示问题
-plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']  # 指定默认字体
-plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
+# plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']  # 指定默认字体
+# plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
 from sklearn.datasets import fetch_california_housing
 
 # 从 src 包中导入 MLPAPI 类以及数据准备和划分的辅助函数
@@ -42,10 +42,10 @@ if __name__ == '__main__':
 
         # 绘制训练历史 (损失)
         plt.figure(figsize=(6, 5))
-        plt.plot(history_california['loss'], label='训练损失')
-        plt.title('加州房价训练损失')
+        plt.plot(history_california['loss'], label='training loss')
+        plt.title('House Price Training Loss')
         plt.xlabel('Epoch')
-        plt.ylabel('损失')
+        plt.ylabel('Loss')
         plt.legend()
 
         # 创建结果目录 (如果不存在)
@@ -62,9 +62,9 @@ if __name__ == '__main__':
         predictions_california = mlp_california.predict(X_test_california)
         plt.figure(figsize=(8, 6))
         plt.scatter(y_test_california, predictions_california, alpha=0.7)
-        plt.xlabel("真实房价")
-        plt.ylabel("预测房价")
-        plt.title("加州房价: 真实值 vs. 预测值")
+        plt.xlabel("True")
+        plt.ylabel("Pred")
+        plt.title("House Price: True vs. Pred")
         plt.plot([y_test_california.min(), y_test_california.max()], [y_test_california.min(), y_test_california.max()], 'k--', lw=2) # 对角线
         plt.grid(True)
 
@@ -78,8 +78,8 @@ if __name__ == '__main__':
         # plt.show()
 
         # 模型保存
-        save_path_california = 'result/california_mlp_model.npy'
-        mlp_california.save_model(save_path_california)
+        save_path_california = 'california_mlp_model.npy'
+        mlp_california.save_model(os.path.join(output_dir, save_path_california))
         print(f"加州房价模型已保存到 {save_path_california}")
 
         # 模型加载示例 (可选, 用于验证)
