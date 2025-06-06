@@ -2,3 +2,5 @@
 assignment/
 MLP/dataset/
 MLP/result/
+.DS_Store
+.venv
