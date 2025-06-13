@@ -13,14 +13,12 @@ class Context:
 
 class Function:
     @classmethod
-    def apply(cls, *inputs):
+    def apply(cls, *inputs, **kwargs):
         from ..tensor import Tensor
 
         ctx = Context()
 
-        raw_inputs = [x.data if isinstance(x, Tensor) else x for x in inputs]
-
-        result = cls.forward(ctx, *raw_inputs)
+        result = cls.forward(ctx, *inputs, **kwargs)
 
         # 包装成 Tensor（构建计算图）
         out = Tensor(result)
@@ -30,7 +28,7 @@ class Function:
         return out
 
     @staticmethod
-    def forward(ctx: Context, *args):
+    def forward(ctx: Context, *args, **kwargs):
         raise NotImplementedError
 
     @staticmethod

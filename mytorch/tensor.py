@@ -5,11 +5,10 @@ from .utils import ensure_tensor
 
 
 class Tensor:
-    def __init__(self, data, frozen=False, _inputs=(), _op=''):
+    def __init__(self, data, frozen=False, _op=''):
         self.data = np.array(data, dtype=np.float32)
-        self.grad = np.zeros_like(self.data) if not self.frozen else None
+        self.grad = np.zeros_like(self.data) if not frozen else None
         self.frozen = frozen
-        self._inputs = _inputs
         self._op = _op
         self._ctx: Context | None = Context()
         self._backward_fn: type[Function] | None = None
@@ -30,19 +29,21 @@ class Tensor:
         def build_topo(tensor):
             if tensor not in visited:
                 visited.add(tensor)
-                for inp in tensor._inputs:
+                for inp in tensor._ctx.inputs:
                     if isinstance(inp, Tensor):
                         build_topo(inp)
                 ordered.append(tensor)
 
         build_topo(self)
+        
+        print("Backward pass order:", [t._op for t in ordered])
 
         for t in reversed(ordered):
             if t._backward_fn is not None:
                 grads = t._backward_fn.backward(t._ctx, t.grad)
                 if not isinstance(grads, tuple):
                     grads = (grads,)
-                for inp, g in zip(t._inputs, grads):
+                for inp, g in zip(t._ctx.inputs, grads):
                     if isinstance(inp, Tensor):
                         inp.grad += g
 

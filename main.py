@@ -1,6 +1,6 @@
-from common.tensor import Tensor
-from common.module import Module
-from common.linear import Linear
+from mytorch.tensor import Tensor
+from mytorch.nn.module import Module
+from mytorch.nn.linear import Linear
 
 
 class MLP(Module):
@@ -21,6 +21,7 @@ if __name__ == "__main__":
     w = Tensor([[2.0], [1.0]])
 
     # 前向传播
+    # print(x, w)
     y = x @ w          # shape (2, 1)
     z = y.sum()              # scalar
 
@@ -31,3 +32,4 @@ if __name__ == "__main__":
 
     print("x.grad =\n", x.grad)
     print("w.grad =\n", w.grad)
+
