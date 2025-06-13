@@ -19,6 +19,8 @@ def unbroadcast(grad, target_shape):
 
 
 class Add(Function):
+    op = '+'
+    
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -33,6 +35,8 @@ class Add(Function):
 
 
 class Sub(Function):
+    op = '-'
+    
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -47,6 +51,8 @@ class Sub(Function):
 
 
 class Mul(Function):
+    op = '*'
+    
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -61,6 +67,8 @@ class Mul(Function):
 
 
 class MatMul(Function):
+    op = '@'
+    
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -80,6 +88,8 @@ class MatMul(Function):
 
 
 class Sum(Function):
+    op = 'SUM'
+    
     @staticmethod
     def forward(ctx: Context, a, axis=None, keepdims=False):
         ctx.save_for_backward(a)
@@ -102,6 +112,8 @@ class Sum(Function):
 
 
 class ReLU(Function):
+    op = 'ReLU'
+    
     @staticmethod
     def forward(ctx: Context, a):
         ctx.save_for_backward(a)

@@ -5,11 +5,10 @@ from .utils import ensure_tensor
 
 
 class Tensor:
-    def __init__(self, data, frozen=False, _op=''):
+    def __init__(self, data, frozen=False):
         self.data = np.array(data, dtype=np.float32)
         self.grad = np.zeros_like(self.data) if not frozen else None
         self.frozen = frozen
-        self._op = _op
         self._ctx: Context | None = Context()
         self._backward_fn: type[Function] | None = None
         self.frozen = frozen
@@ -35,8 +34,6 @@ class Tensor:
                 ordered.append(tensor)
 
         build_topo(self)
-        
-        print("Backward pass order:", [t._op for t in ordered])
 
         for t in reversed(ordered):
             if t._backward_fn is not None:

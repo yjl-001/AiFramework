@@ -12,6 +12,8 @@ class Context:
 
 
 class Function:
+    op = ''
+
     @classmethod
     def apply(cls, *inputs, **kwargs):
         from ..tensor import Tensor
