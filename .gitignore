@@ -4,3 +4,6 @@ MLP/dataset/
 MLP/result/
 .DS_Store
 .venv
+*.pyc
+*.npy
+__pycache__
