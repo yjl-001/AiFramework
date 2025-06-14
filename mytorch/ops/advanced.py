@@ -1,5 +1,5 @@
 import numpy as np
-from mytorch.ops.function import Function, Context
+from .function import Function, Context
 
 
 def unbroadcast(grad, target_shape):

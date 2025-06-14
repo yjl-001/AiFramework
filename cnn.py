@@ -1,33 +1,25 @@
 from mytorch.tensor import Tensor
-from mytorch.nn.module import Module
-from mytorch.nn.linear import Linear
-from mytorch.opt import Optimizer, Adam
+from mytorch.nn import Module, Conv2d, MaxPool2d, Linear
+from mytorch.opt import Adam
 from mytorch.dataset import DataLoader, MNISTDataset
 from mytorch import no_grad
 from mytorch.nn.loss import cross_entropy_loss
 
 import numpy as np
 
-import time
 
-
-class MLP(Module):
+class SimpleCNN(Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = Linear(784, 128)
-        self.fc2 = Linear(128, 10)
+        self.conv1 = Conv2d(1, 8, kernel_size=3, stride=1, padding=1)
+        self.pool = MaxPool2d(kernel_size=2)
+        self.fc = Linear(8 * 14 * 14, 10)  # 输入图像为 1x28x28，池化后为 8x14x14
 
     def forward(self, x):
-        x = self.fc1(x).relu()
-        x = self.fc2(x)
+        x = self.conv1(x).relu()
+        x = self.pool(x).flatten()
+        x = self.fc(x)
         return x
-
-
-def cross_entropy_loss(logits: Tensor, targets):
-    log_probs = logits.log_softmax(dim=1)
-    batch_size = targets.shape[0]
-    loss = -log_probs[np.arange(batch_size), targets].mean()
-    return loss
 
 
 def accuracy(logits, targets):
@@ -35,20 +27,18 @@ def accuracy(logits, targets):
     return (preds == targets).float().mean()
 
 
-def train(model: Module, dataloader: DataLoader, optimizer: Optimizer, epoch):
+def train(model: Module, dataloader: DataLoader, optimizer: Adam, epoch):
     model.train()
     total_loss = 0
     total_acc = 0
     for batch_idx, (data, targets) in enumerate(dataloader):
-        # 将数据转换为Tensor
-        # shape: (batch_size, 784)
-        x = Tensor([d.flatten() for d in data])
-        y = Tensor(targets, dtype="int")         # shape: (batch_size,)
+        # 将数据转换为 Tensor，保持图像形状 (N, 1, 28, 28)
+        x = Tensor(data)
+        y = Tensor(targets, dtype="int")
 
         # 前向传播
         logits = model(x)
         loss = cross_entropy_loss(logits, y)
-        print(f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss.item():.4f}")
 
         # 反向传播
         optimizer.zero_grad()
@@ -74,7 +64,7 @@ def test(model: Module, dataloader: DataLoader):
     total_acc = 0
     with no_grad():
         for data, targets in dataloader:
-            x = Tensor([d.flatten() for d in data])
+            x = Tensor(np.expand_dims(data, axis=1))  # (N, 1, 28, 28)
             y = Tensor(targets, dtype="int")
 
             logits = model(x)
@@ -95,8 +85,8 @@ if __name__ == "__main__":
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     # 初始化模型和优化器
-    model = MLP()
-    optimizer = Adam(model.parameters(), lr=0.00001)
+    model = SimpleCNN()
+    optimizer = Adam(model.parameters(), lr=0.0001)
 
     # 训练模型
     for epoch in range(1, 6):
