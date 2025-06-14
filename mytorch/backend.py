@@ -28,18 +28,20 @@ try:
     cp.array([1])
     xp = cp
     use_gpu = True
-    print("✅ CuPy (GPU) is available, using it as backend")
+    print("✅ CuPy (GPU) is available, using it as backend by default.")
     set_cupy_cache_dir()
 except Exception:
     import numpy as np
     xp = np
     use_gpu = False
-    print("⚠️  CuPy (GPU) is not available, using NumPy (CPU) instead")
+    print("⚠️  CuPy (GPU) is not available, using NumPy (CPU) instead.")
 
 
 def set_backend(backend):
     global xp, use_gpu
     if backend == 'gpu':
+        if use_gpu:
+            return
         try:
             import cupy as cp
             cp.array([1])
@@ -50,6 +52,8 @@ def set_backend(backend):
         except Exception:
             raise ImportError("CuPy is not installed or GPU is not available.")
     elif backend == 'cpu':
+        if not use_gpu:
+            return
         import numpy as np
         xp = np
         use_gpu = False
