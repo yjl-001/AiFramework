@@ -1,7 +1,7 @@
 from mytorch.tensor import Tensor
 from mytorch.nn.module import Module
 from mytorch.nn.linear import Linear
-from mytorch.optim.sgd import SGD  # 假设你实现了SGD优化器
+from mytorch.opt import Optimizer, SGD
 from mytorch.dataset import DataLoader, MNISTDataset
 
 import time
@@ -31,7 +31,7 @@ def accuracy(logits, targets):
     return (preds == targets).float().mean()
 
 
-def train(model, dataloader, optimizer, epoch):
+def train(model: Module, dataloader: DataLoader, optimizer: Optimizer, epoch):
     model.train()
     total_loss = 0
     total_acc = 0
@@ -54,14 +54,16 @@ def train(model, dataloader, optimizer, epoch):
         total_acc += accuracy(logits, y).item()
 
         if batch_idx % 100 == 0:
-            print(f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss.item():.4f}")
+            print(
+                f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss.item():.4f}")
 
     avg_loss = total_loss / len(dataloader)
     avg_acc = total_acc / len(dataloader)
-    print(f"Epoch {epoch} Summary: Loss = {avg_loss:.4f}, Accuracy = {avg_acc:.4f}")
+    print(
+        f"Epoch {epoch} Summary: Loss = {avg_loss:.4f}, Accuracy = {avg_acc:.4f}")
 
 
-def test(model, dataloader):
+def test(model: Module, dataloader: DataLoader):
     model.eval()
     total_acc = 0
     with Tensor.no_grad():
@@ -78,8 +80,10 @@ def test(model, dataloader):
 
 if __name__ == "__main__":
     # 加载数据
-    train_dataset = MNISTDataset(root="./data/mnist", train=True, from_csv=True)
-    test_dataset = MNISTDataset(root="./data/mnist", train=False, from_csv=True)
+    train_dataset = MNISTDataset(
+        root="./data/mnist", train=True, from_csv=True)
+    test_dataset = MNISTDataset(
+        root="./data/mnist", train=False, from_csv=True)
 
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
