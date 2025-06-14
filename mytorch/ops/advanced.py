@@ -3,14 +3,9 @@ from mytorch.ops.function import Function, Context
 
 
 def unbroadcast(grad, target_shape):
-    """
-    将梯度 grad 按照 target_shape 的维度还原（用于广播维度的反向传播）
-    """
-    # 先消除多余的维度
     while grad.ndim > len(target_shape):
         grad = grad.sum(axis=0)
 
-    # 对于原始的维度中为1的维度，沿该维度求和（因为在前向中被广播过）
     for i, dim in enumerate(target_shape):
         if dim == 1:
             grad = grad.sum(axis=i, keepdims=True)
@@ -20,14 +15,15 @@ def unbroadcast(grad, target_shape):
 
 class GetItem(Function):
     @staticmethod
-    def forward(ctx, x, idx):
+    def forward(ctx: Context, x, idx):
+        ctx.save_for_backward(x)
         ctx.idx = idx
-        ctx.input_shape = x.data.shape
         return x.data[idx]
 
     @staticmethod
-    def backward(ctx, grad_output):
-        grad = np.zeros(ctx.input_shape, dtype=np.float32)
+    def backward(ctx: Context, grad_output):
+        (x,) = ctx.saved_tensors
+        grad = np.zeros_like(x.data, dtype=np.float32)
         grad[ctx.idx] = grad_output
         return grad, None
 
@@ -63,12 +59,13 @@ class LogSoftmax(Function):
         exp = np.exp(shifted)
         sum_exp = np.sum(exp, axis=dim, keepdims=True)
         log_softmax = shifted - np.log(sum_exp)
-        ctx.output = np.exp(log_softmax)  # softmax(x)
+
+        ctx.output = np.exp(log_softmax)  # 保存 softmax(x) 以便反向传播使用
         return log_softmax
 
     @staticmethod
     def backward(ctx: Context, grad_output):
-        x, = ctx.saved_tensors
+        (x,) = ctx.saved_tensors
         softmax = ctx.output
         dim = ctx.dim
 
