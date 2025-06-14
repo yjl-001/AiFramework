@@ -1137,35 +1137,8 @@ if __name__ == '__main__':
     print("get_parameters 和 set_parameters 测试通过。")
 
     print("\n所有 LSTM 测试完成。")
-<... 440 more lines not shown ...>
-```
-
-
-</toolcall_result>
                 
-                dx_t_batch[b, :] = gradients_cell['dx_t']
-                dh_prev_batch_accum[b, :] = gradients_cell['dh_prev']
-                dc_prev_batch_accum[b, :] = gradients_cell['dc_prev']
-            
-            dX[:, t, :] = dx_t_batch
-            dh_next_batch = dh_prev_batch_accum # Pass to previous timestep
-            dc_next_batch = dc_prev_batch_accum # Pass to previous timestep
 
-        # Average gradients over batch size? Or let optimizer handle it?
-        # Typically, sum gradients here, and optimizer applies learning rate (and possibly divides by batch size)
-
-        layer_gradients = {
-            'dW_i': dW_i_total, 'dU_i': dU_i_total, 'db_i': db_i_total,
-            'dW_f': dW_f_total, 'dU_f': dU_f_total, 'db_f': db_f_total,
-            'dW_o': dW_o_total, 'dU_o': dU_o_total, 'db_o': db_o_total,
-            'dW_c': dW_c_total, 'dU_c': dU_c_total, 'db_c': db_c_total,
-            'dX': dX
-        }
-        if self.W_y is not None:
-            layer_gradients['dW_y'] = dW_y_total
-            layer_gradients['db_y'] = db_y_total
-            
-        return layer_gradients
 
 # --- TODO: Vectorize LSTMCell --- 
 # The current implementation of LSTMLayer.forward and LSTMLayer.backward iterates through the batch.
@@ -1343,7 +1316,7 @@ class VectorizedLSTMLayer:
                         Shape: (batch_size, hidden_size/output_size) if not return_sequences.
         caches_layer: List of caches from each timestep's cell.forward.
         """
-        batch_size, _, _ = caches_layer[0][0].shape # x_t_batch from first cache
+        batch_size, _ = caches_layer[0][0].shape # x_t_batch is (batch_size, input_size)
         sequence_length = len(caches_layer)
 
         # Initialize gradients for cell parameters (accumulated)

@@ -9,8 +9,8 @@ from src.activations import get_activation
 from src.losses import get_loss
 from src.optimizers import Adam, SGD
 from src.training import Trainer
-from src.utils import (pad_sequences, create_vocabulary, sentences_to_sequences, 
-                       calculate_bleu_score, batch_iterator)
+from src.utils import (pad_sequences, build_vocab, sentences_to_sequences, 
+                       bleu_score, batch_iterator)
 from src.seq2seq import Encoder, Decoder, Seq2Seq
 # from src.attention import BahdanauAttention, LuongAttention # If using attention
 # from src.gru import GRULayer # If comparing with GRU
@@ -27,7 +27,7 @@ def run_sequence_classification_example():
     # Random integer sequences
     X = np.random.randint(1, vocab_size, size=(num_samples, sequence_length)) # 0 is for padding
     # Pad sequences (though they are already same length here, good practice)
-    X = pad_sequences(X, maxlen=sequence_length, padding_value=0)
+    X = pad_sequences(X, max_len=sequence_length, value=0)
     Y = np.random.randint(0, 2, size=(num_samples, 1)) # Binary classification
 
     # Split data (simple split)
@@ -40,9 +40,9 @@ def run_sequence_classification_example():
 
     # 2. Define Model
     model = Model()
-    model.add_layer(Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=sequence_length))
-    model.add_layer(VectorizedLSTMLayer(units=lstm_units, input_dim=embedding_dim, return_sequences=False))
-    model.add_layer(Dense(units=1, activation='sigmoid')) # Sigmoid for binary classification
+    model.add(Embedding(input_dim=vocab_size, output_dim=embedding_dim))
+    model.add(VectorizedLSTMLayer(input_size=embedding_dim, hidden_size=lstm_units, return_sequences=False))
+    model.add(Dense(output_units=1, activation='sigmoid')) # Sigmoid for binary classification
 
     # 3. Compile Model (Set optimizer and loss)
     optimizer = Adam(learning_rate=0.01)
