@@ -4,15 +4,43 @@ from .ops.basic import *
 from .ops.advanced import *
 from .utils import ensure_tensor
 
+from contextlib import contextmanager
+
+_grad_enabled = True
+
+
+def is_grad_enabled():
+    """
+    Check if gradient tracking is enabled.
+    """
+    return _grad_enabled
+
+
+@contextmanager
+def no_grad():
+    """
+    Context manager to disable gradient tracking.
+    """
+    global _grad_enabled
+    prev_state = _grad_enabled
+    _grad_enabled = False
+    try:
+        yield
+    finally:
+        _grad_enabled = prev_state
+
 
 class Tensor:
     def __init__(self, data, dtype=np.float32, frozen=False):
+        frozen = frozen or not is_grad_enabled()
         self.data = np.array(data, dtype=dtype)
         self.grad = np.zeros_like(self.data) if not frozen else None
         self.frozen = frozen
         self._ctx: Context | None = Context()
         self._backward_fn: type[Function] | None = None
-        self.frozen = frozen
+
+    def __hash__(self):
+        return id(self)
 
     def __repr__(self):
         return f"Tensor(data={self.data}, grad={self.grad})"
@@ -39,6 +67,15 @@ class Tensor:
 
     def astype(self, dtype):
         return Tensor(self.data.astype(dtype), dtype=dtype, frozen=self.frozen)
+
+    def float(self):
+        return self.astype(np.float32)
+
+    def int(self):
+        return self.astype(np.int32)
+
+    def long(self):
+        return self.astype(np.int64)
 
     def freeze(self):
         if self.grad is not None:
@@ -167,6 +204,9 @@ class Tensor:
     def exp(self):
         return Exp.apply(self)
 
+    def sqrt(self):
+        return Sqrt.apply(self)
+
     def log(self):
         return Log.apply(self)
 
@@ -181,6 +221,16 @@ class Tensor:
 
     def min(self, axis=None, keepdims=False):
         return Min.apply(self, axis=axis, keepdims=keepdims)
+
+    def argmax(self, axis=None, dim=None):
+        if dim is not None:
+            axis = dim
+        return ArgMax.apply(self, axis)
+
+    def argmin(self, axis=None, dim=None):
+        if dim is not None:
+            axis = dim
+        return ArgMin.apply(self, axis)
 
     def mean(self):
         return Mean.apply(self)

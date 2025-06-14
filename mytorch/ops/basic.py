@@ -120,6 +120,22 @@ class Pow(Function):
         return grad_a, grad_b
 
 
+class Sqrt(Function):
+    op = 'sqrt'
+
+    @staticmethod
+    def forward(ctx: Context, a):
+        out = np.sqrt(a.data)
+        ctx.save_for_backward(a)
+        ctx.out = out
+        return out
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (a,) = ctx.saved_tensors
+        return grad_output * 0.5 / np.sqrt(a.data)
+
+
 class Exp(Function):
     op = 'exp'
 
@@ -290,6 +306,32 @@ class Min(Function):
         mask = (a.data == out)
         count = np.sum(mask, axis=axis, keepdims=True)
         return grad_output * mask / count
+
+
+class ArgMax(Function):
+    op = 'argmax'
+
+    @staticmethod
+    def forward(ctx: Context, a, dim=None):
+        ctx.save_for_backward()
+        return np.argmax(a.data, axis=dim)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
+
+
+class ArgMin(Function):
+    op = 'argmin'
+
+    @staticmethod
+    def forward(ctx: Context, a, dim=None):
+        ctx.save_for_backward()
+        return np.argmin(a.data, axis=dim)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
 
 
 class Reshape(Function):

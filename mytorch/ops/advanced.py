@@ -16,6 +16,19 @@ def unbroadcast(grad, target_shape):
 class GetItem(Function):
     @staticmethod
     def forward(ctx: Context, x, idx):
+        from ..tensor import Tensor
+        if isinstance(idx, tuple):
+            idx = tuple(
+                i.data if isinstance(i, Tensor) else
+                np.array(i) if isinstance(i, range) else
+                i
+                for i in idx
+            )
+        elif isinstance(idx, Tensor):
+            idx = idx.data
+        elif isinstance(idx, range):
+            idx = np.array(idx)
+
         ctx.save_for_backward(x)
         ctx.idx = idx
         return x.data[idx]

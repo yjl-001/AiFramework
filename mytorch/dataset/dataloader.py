@@ -28,3 +28,6 @@ class DataLoader:
 
         self.current_idx += self.batch_size
         return data_batch, label_batch
+
+    def __len__(self):
+        return (len(self.dataset) + self.batch_size - 1) // self.batch_size

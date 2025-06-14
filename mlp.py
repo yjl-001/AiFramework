@@ -3,6 +3,9 @@ from mytorch.nn.module import Module
 from mytorch.nn.linear import Linear
 from mytorch.opt import Optimizer, SGD
 from mytorch.dataset import DataLoader, MNISTDataset
+from mytorch import no_grad
+
+import numpy as np
 
 import time
 
@@ -22,7 +25,7 @@ class MLP(Module):
 def cross_entropy_loss(logits, targets):
     log_probs = logits.log_softmax(dim=1)
     batch_size = targets.shape[0]
-    loss = -log_probs[range(batch_size), targets].mean()
+    loss = -log_probs[np.arange(batch_size), targets].mean()
     return loss
 
 
@@ -67,7 +70,7 @@ def train(model: Module, dataloader: DataLoader, optimizer: Optimizer, epoch):
 def test(model: Module, dataloader: DataLoader):
     model.eval()
     total_acc = 0
-    with Tensor.no_grad():
+    with no_grad():
         for data, targets in dataloader:
             x = Tensor([d.flatten() for d in data])
             y = Tensor(targets, dtype="int")

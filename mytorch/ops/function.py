@@ -8,6 +8,10 @@ class Context:
         self.saved_tensors = ()
 
     def save_for_backward(self, *tensors):
+        from ..tensor import Tensor
+        assert all(
+            isinstance(t, Tensor) for t in tensors
+        ), "All saved tensors must be instances of Tensor."
         self.saved_tensors = tensors
 
 
