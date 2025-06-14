@@ -63,7 +63,7 @@ def test(model: Module, dataloader: DataLoader):
     total_acc = 0
     with no_grad():
         for data, targets in dataloader:
-            x = Tensor(xp.expand_dims(data, axis=1))  # (N, 1, 28, 28)
+            x = Tensor(data)  # (N, 1, 28, 28)
             y = Tensor(targets, dtype="int")
 
             logits = model(x)
