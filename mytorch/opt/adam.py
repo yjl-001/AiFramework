@@ -1,5 +1,6 @@
 from .optimizer import Optimizer
-from ..tensor import Tensor
+
+import numpy as np
 
 
 class Adam(Optimizer):
@@ -8,8 +9,8 @@ class Adam(Optimizer):
         self.lr = lr
         self.betas = betas
         self.eps = eps
-        self.m = [Tensor.zeros_like(p) for p in self.params]
-        self.v = [Tensor.zeros_like(p) for p in self.params]
+        self.m = [np.zeros_like(p.data) for p in self.params]
+        self.v = [np.zeros_like(p.data) for p in self.params]
         self.t = 0
 
     def step(self):
@@ -25,4 +26,4 @@ class Adam(Optimizer):
             m_hat = self.m[i] / (1 - self.betas[0] ** self.t)
             v_hat = self.v[i] / (1 - self.betas[1] ** self.t)
 
-            param.data -= self.lr * m_hat / (v_hat.sqrt() + self.eps)
+            param.data -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)

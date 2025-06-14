@@ -64,24 +64,21 @@ class Where(Function):
 class LogSoftmax(Function):
     @staticmethod
     def forward(ctx: Context, x, dim):
-        ctx.save_for_backward(x)
         ctx.dim = dim
-
         x_max = np.max(x.data, axis=dim, keepdims=True)
         shifted = x.data - x_max
         exp = np.exp(shifted)
         sum_exp = np.sum(exp, axis=dim, keepdims=True)
-        log_softmax = shifted - np.log(sum_exp)
+        softmax = exp / sum_exp
+        log_softmax = np.log(softmax + 1e-9)  # 加 epsilon 防止 log(0)
 
-        ctx.output = np.exp(log_softmax)  # 保存 softmax(x) 以便反向传播使用
+        ctx.softmax = softmax
         return log_softmax
 
     @staticmethod
     def backward(ctx: Context, grad_output):
-        (x,) = ctx.saved_tensors
-        softmax = ctx.output
+        softmax = ctx.softmax
         dim = ctx.dim
-
         grad_input = grad_output - \
             np.sum(grad_output * softmax, axis=dim, keepdims=True) * softmax
-        return grad_input
+        return grad_input, None

@@ -1,7 +1,7 @@
 from mytorch.tensor import Tensor
 from mytorch.nn.module import Module
 from mytorch.nn.linear import Linear
-from mytorch.opt import Optimizer, SGD
+from mytorch.opt import Optimizer, SGD, Adam
 from mytorch.dataset import DataLoader, MNISTDataset
 from mytorch import no_grad
 
@@ -22,7 +22,7 @@ class MLP(Module):
         return x
 
 
-def cross_entropy_loss(logits, targets):
+def cross_entropy_loss(logits: Tensor, targets):
     log_probs = logits.log_softmax(dim=1)
     batch_size = targets.shape[0]
     loss = -log_probs[np.arange(batch_size), targets].mean()
@@ -40,7 +40,8 @@ def train(model: Module, dataloader: DataLoader, optimizer: Optimizer, epoch):
     total_acc = 0
     for batch_idx, (data, targets) in enumerate(dataloader):
         # 将数据转换为Tensor
-        x = Tensor([d.flatten() for d in data])  # shape: (batch_size, 784)
+        # shape: (batch_size, 784)
+        x = Tensor([d.flatten() for d in data])
         y = Tensor(targets, dtype="int")         # shape: (batch_size,)
 
         # 前向传播
@@ -94,7 +95,7 @@ if __name__ == "__main__":
 
     # 初始化模型和优化器
     model = MLP()
-    optimizer = SGD(model.parameters(), lr=0.01)
+    optimizer = Adam(model.parameters(), lr=0.00001)
 
     # 训练模型
     for epoch in range(1, 6):
