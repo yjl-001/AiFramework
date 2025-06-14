@@ -16,6 +16,14 @@ class Tensor:
     def __repr__(self):
         return f"Tensor(data={self.data}, grad={self.grad})"
 
+    def zero_grad(self):
+        if self.grad is not None:
+            self.grad.fill(0)
+
+    @classmethod
+    def zeros_like(cls, other):
+        return cls(np.zeros_like(other.data), frozen=other.frozen)
+
     def backward(self, grad=None):
         if grad is None:
             grad = np.ones_like(self.data)
