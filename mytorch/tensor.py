@@ -87,6 +87,14 @@ class Tensor:
             self.grad = xp.zeros_like(self.data)
             self.frozen = False
 
+    def squeeze(self):
+        return Tensor(self.data.squeeze(), dtype=self.dtype, frozen=self.frozen)
+
+    def unsqueeze(self, axis):
+        if axis < 0:
+            axis += len(self.shape) + 1
+        return Tensor(xp.expand_dims(self.data, axis), dtype=self.dtype, frozen=self.frozen)
+
     def to(self, device):
         if device != "cpu":
             raise NotImplementedError("Only 'cpu' device is supported.")
@@ -104,6 +112,11 @@ class Tensor:
         if self.grad is not None:
             cloned_tensor.grad = self.grad.copy()
         return cloned_tensor
+
+    def zeros(self, shape=None):
+        if shape is None:
+            shape = self.data.shape
+        return Tensor(xp.zeros(shape, dtype=self.dtype), frozen=self.frozen)
 
     def numpy(self):
         return self.data.copy()

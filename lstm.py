@@ -17,7 +17,8 @@ class LSTMCell(Module):
         # x: (batch, input_size)
         # h_prev, c_prev: (batch, hidden_size)
 
-        gates = self.x2h(x) + self.h2h(h_prev)  # (batch, 4 * hidden_size)
+        # (batch, 4 * hidden_size)
+        gates: Tensor = self.x2h(x) + self.h2h(h_prev)
 
         # 拆分门
         i, f, g, o = gates.chunk(4, dim=1)  # 每个 shape: (batch, hidden_size)
@@ -27,7 +28,7 @@ class LSTMCell(Module):
         g = g.tanh()
         o = o.sigmoid()
 
-        c = f * c_prev + i * g
+        c: Tensor = f * c_prev + i * g
         h = o * c.tanh()
 
         return h, c
@@ -70,7 +71,7 @@ class SimpleLSTM(Module):
         self.lstm = LSTM(input_size=28, hidden_size=128)
         self.fc = Linear(128, 10)
 
-    def forward(self, x):
+    def forward(self, x: Tensor):
         x = x.squeeze(1)  # (batch, 28, 28)
         x = x.transpose(0, 1)  # (seq_len=28, batch, input_size=28)
         output, (h_n, c_n) = self.lstm(x)
