@@ -18,9 +18,19 @@ def unbroadcast(grad, target_shape):
     return grad
 
 
+class Neg(Function):
+    @staticmethod
+    def forward(ctx: Context, x):
+        return -x.data
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return -grad_output
+
+
 class Add(Function):
     op = '+'
-    
+
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -36,7 +46,7 @@ class Add(Function):
 
 class Sub(Function):
     op = '-'
-    
+
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -52,7 +62,7 @@ class Sub(Function):
 
 class Mul(Function):
     op = '*'
-    
+
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -68,7 +78,7 @@ class Mul(Function):
 
 class MatMul(Function):
     op = '@'
-    
+
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
@@ -87,9 +97,52 @@ class MatMul(Function):
         return grad_a, grad_b
 
 
+class Div(Function):
+    op = '/'
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        ctx.save_for_backward(a.data, b.data)
+        return a.data / b.data
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        a, b = ctx.saved_tensors
+        return grad_output / b, -grad_output * a / (b ** 2)
+
+
+class Exp(Function):
+    op = 'EXP'
+
+    @staticmethod
+    def forward(ctx: Context, a):
+        out = np.exp(a.data)
+        ctx.save_for_backward(out)
+        return out
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (out,) = ctx.saved_tensors
+        return grad_output * out
+
+
+class Log(Function):
+    op = 'LOG'
+
+    @staticmethod
+    def forward(ctx: Context, a):
+        ctx.save_for_backward(a.data)
+        return np.log(a.data)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (a,) = ctx.saved_tensors
+        return grad_output / a
+
+
 class Sum(Function):
-    op = 'SUM'
-    
+    op = 'sum'
+
     @staticmethod
     def forward(ctx: Context, a, axis=None, keepdims=False):
         ctx.save_for_backward(a)
@@ -111,9 +164,25 @@ class Sum(Function):
         return grad_a
 
 
+class Mean(Function):
+    op = 'mean'
+
+    @staticmethod
+    def forward(ctx: Context, x):
+        ctx.input_shape = x.data.shape
+        return np.array(x.data.mean(), dtype=np.float32)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        grad = grad_output * \
+            np.ones(ctx.input_shape, dtype=np.float32) / \
+            np.prod(ctx.input_shape)
+        return grad
+
+
 class ReLU(Function):
-    op = 'ReLU'
-    
+    op = 'relu'
+
     @staticmethod
     def forward(ctx: Context, a):
         ctx.save_for_backward(a)
@@ -124,3 +193,91 @@ class ReLU(Function):
         a, = ctx.saved_tensors
         relu_grad = (a.data > 0).astype(a.data.dtype)
         return grad_output * relu_grad
+
+
+class Sigmoid(Function):
+    op = 'sigmoid'
+
+    @staticmethod
+    def forward(ctx: Context, a):
+        out = 1 / (1 + np.exp(-a.data))
+        ctx.save_for_backward(out)
+        return out
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (out,) = ctx.saved_tensors
+        return grad_output * out * (1 - out)
+
+
+class Tanh(Function):
+    op = 'tanh'
+
+    @staticmethod
+    def forward(ctx: Context, a):
+        out = np.tanh(a.data)
+        ctx.save_for_backward(out)
+        return out
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (out,) = ctx.saved_tensors
+        return grad_output * (1 - out ** 2)
+
+
+class Reshape(Function):
+    op = 'reshape'
+
+    @staticmethod
+    def forward(ctx: Context, a, shape):
+        ctx.save_for_backward(a.data.shape)
+        return a.data.reshape(shape)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (original_shape,) = ctx.saved_tensors
+        return grad_output.reshape(original_shape), None
+
+
+class Transpose(Function):
+    op = 'transpose'
+
+    @staticmethod
+    def forward(ctx: Context, a, axes):
+        ctx.save_for_backward(axes)
+        return np.transpose(a.data, axes)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (axes,) = ctx.saved_tensors
+        reverse_axes = np.argsort(axes)
+        return np.transpose(grad_output, reverse_axes), None
+
+
+class Flatten(Function):
+    op = 'flatten'
+
+    @staticmethod
+    def forward(ctx: Context, a):
+        ctx.save_for_backward(a.data.shape)
+        return a.data.reshape(a.data.shape[0], -1)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (original_shape,) = ctx.saved_tensors
+        return grad_output.reshape(original_shape)
+
+
+class Clip(Function):
+    op = 'clip'
+
+    @staticmethod
+    def forward(ctx: Context, a, min_val, max_val):
+        ctx.save_for_backward(a.data, min_val, max_val)
+        return np.clip(a.data, min_val, max_val)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        a, min_val, max_val = ctx.saved_tensors
+        mask = (a >= min_val) & (a <= max_val)
+        return grad_output * mask, None, None

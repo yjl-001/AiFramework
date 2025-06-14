@@ -1,6 +1,7 @@
 import numpy as np
 from .ops.function import Function, Context
-from .ops.basic import Add, Mul, MatMul, Sum, ReLU
+from .ops.basic import *
+from .ops.advanced import *
 from .utils import ensure_tensor
 
 
@@ -52,6 +53,12 @@ class Tensor:
                     if isinstance(inp, Tensor):
                         inp.grad += g
 
+    def __getitem__(self, idx):
+        return GetItem.apply(self, idx)
+
+    def __neg__(self):
+        return Neg.apply(self)
+
     def __add__(self, other):
         return Add.apply(self, ensure_tensor(other))
 
@@ -61,8 +68,41 @@ class Tensor:
     def __matmul__(self, other):
         return MatMul.apply(self, ensure_tensor(other))
 
+    def __truediv__(self, other):
+        return Div.apply(self, ensure_tensor(other))
+
+    def exp(self):
+        return Exp.apply(self)
+
+    def log(self):
+        return Log.apply(self)
+
+    def sigmoid(self):
+        return Sigmoid.apply(self)
+
+    def tanh(self):
+        return Tanh.apply(self)
+
+    def reshape(self, shape):
+        return Reshape.apply(self, shape)
+
+    def transpose(self, axes):
+        return Transpose.apply(self, axes)
+
+    def flatten(self):
+        return Flatten.apply(self)
+
+    def clip(self, min_val, max_val):
+        return Clip.apply(self, min_val, max_val)
+
     def sum(self, axis=None, keepdims=False):
         return Sum.apply(self, axis=axis, keepdims=keepdims)
 
+    def mean(self):
+        return Mean.apply(self)
+
     def relu(self):
         return ReLU.apply(self)
+
+    def log_softmax(self, dim):
+        return LogSoftmax.apply(self, dim)
