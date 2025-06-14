@@ -23,15 +23,23 @@ class Function:
         from ..tensor import Tensor
 
         ctx = Context()
+        ctx.inputs = inputs
 
         result = cls.forward(ctx, *inputs, **kwargs)
 
-        # 包装成 Tensor（构建计算图）
-        out = Tensor(result, dtype=result.dtype)
-        out._ctx = ctx
-        out._ctx.inputs = inputs  # 保存原始输入 Tensor
-        out._backward_fn = cls    # 指定反向传播要用的类
-        return out
+        if isinstance(result, tuple):
+            outputs = []
+            for res in result:
+                t = Tensor(res.data if isinstance(res, Tensor) else res)
+                t._ctx = ctx
+                t._backward_fn = cls
+                outputs.append(t)
+            return tuple(outputs)
+        else:
+            t = Tensor(result.data if isinstance(result, Tensor) else result)
+            t._ctx = ctx
+            t._backward_fn = cls
+            return t
 
     @staticmethod
     def forward(ctx: Context, *args, **kwargs):

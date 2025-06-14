@@ -259,6 +259,13 @@ class Tensor:
     def clip(self, min_val, max_val):
         return Clip.apply(self, min_val, max_val)
 
+    def chunk(self, chunks, dim=0):
+        return tuple(Chunk.apply(self, index=i, chunks=chunks, dim=dim) for i in range(chunks))
+
+    @staticmethod
+    def stack(tensors, dim=0):
+        return Stack.apply(tensors, dim)
+
     @staticmethod
     def where(condition, x, y):
         return Where.apply(ensure_tensor(condition), ensure_tensor(x), ensure_tensor(y))

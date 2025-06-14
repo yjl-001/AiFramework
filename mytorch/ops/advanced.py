@@ -82,3 +82,48 @@ class LogSoftmax(Function):
         grad_input = grad_output - \
             xp.sum(grad_output * softmax, axis=dim, keepdims=True) * softmax
         return grad_input, None
+
+
+class Chunk(Function):
+    @staticmethod
+    def forward(ctx: Context, x, *, index, chunks, dim):
+        ctx.index = index
+        ctx.chunks = chunks
+        ctx.dim = dim
+        ctx.input_shape = x.data.shape
+        ctx.save_for_backward(x)
+
+        split = xp.array_split(x.data, chunks, axis=dim)
+        return split[index]
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        shape = ctx.input_shape
+        dim = ctx.dim
+        chunks = ctx.chunks
+        index = ctx.index
+
+        grads = [xp.zeros_like(xp.array_split(xp.zeros(shape), chunks, axis=dim)[
+                               i]) for i in range(chunks)]
+        grads[index] = grad_output
+
+        return xp.concatenate(grads, axis=dim), None, None, None
+
+
+class Stack(Function):
+    @staticmethod
+    def forward(ctx: Context, tensors, dim):
+        ctx.dim = dim
+        ctx.num_inputs = len(tensors)
+        ctx.save_for_backward(*tensors)
+
+        data = [t.data for t in tensors]
+        stacked = xp.stack(data, axis=dim)
+        return stacked
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        # 拆分梯度
+        from ..tensor import Tensor
+        grads = xp.split(grad_output, ctx.num_inputs, axis=ctx.dim)
+        return tuple(Tensor(g.squeeze(axis=ctx.dim)) for g in grads), None
