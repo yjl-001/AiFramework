@@ -111,6 +111,78 @@ class Div(Function):
         return grad_output / b, -grad_output * a / (b ** 2)
 
 
+class Equal(Function):
+    op = '=='
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        return (a.data == b.data).astype(np.float32)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
+
+
+class NotEqual(Function):
+    op = '!='
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        return (a.data != b.data).astype(np.float32)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
+
+
+class Less(Function):
+    op = '<'
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        return (a.data < b.data).astype(np.float32)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
+
+
+class LessEqual(Function):
+    op = '<='
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        return (a.data <= b.data).astype(np.float32)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
+
+
+class Greater(Function):
+    op = '>'
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        return (a.data > b.data).astype(np.float32)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
+
+
+class GreaterEqual(Function):
+    op = '>='
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        return (a.data >= b.data).astype(np.float32)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        return None, None
+
+
 class Exp(Function):
     op = 'EXP'
 
@@ -138,6 +210,96 @@ class Log(Function):
     def backward(ctx: Context, grad_output):
         (a,) = ctx.saved_tensors
         return grad_output / a
+
+
+class Abs(Function):
+    op = 'abs'
+
+    @staticmethod
+    def forward(ctx: Context, a):
+        ctx.save_for_backward(a)
+        return np.abs(a.data)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (a,) = ctx.saved_tensors
+        grad = grad_output * np.sign(a.data)
+        return grad
+
+
+class Pow(Function):
+    op = 'pow'
+
+    @staticmethod
+    def forward(ctx: Context, a, b):
+        ctx.save_for_backward(a, b)
+        return a.data ** b.data
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        a, b = ctx.saved_tensors
+        grad_a = grad_output * b.data * (a.data ** (b.data - 1))
+        grad_b = grad_output * (a.data ** b.data) * \
+            np.log(a.data + 1e-10)  # 避免 log(0)
+        grad_a = unbroadcast(grad_a, a.data.shape)
+        grad_b = unbroadcast(grad_b, b.data.shape)
+        return grad_a, grad_b
+
+
+class Max(Function):
+    op = 'max'
+
+    @staticmethod
+    def forward(ctx: Context, a, axis=None, keepdims=False):
+        ctx.save_for_backward(a)
+        ctx.axis = axis
+        ctx.keepdims = keepdims
+        out = np.max(a.data, axis=axis, keepdims=keepdims)
+        ctx.out = out
+        return out
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (a,) = ctx.saved_tensors
+        axis = ctx.axis
+        keepdims = ctx.keepdims
+        out = ctx.out
+
+        if not keepdims and axis is not None:
+            grad_output = np.expand_dims(grad_output, axis)
+
+        mask = (a.data == out)
+        count = np.sum(mask, axis=axis, keepdims=True)
+        grad = grad_output * mask / count
+        return grad
+
+
+class Min(Function):
+    op = 'min'
+
+    @staticmethod
+    def forward(ctx: Context, a, axis=None, keepdims=False):
+        ctx.save_for_backward(a)
+        ctx.axis = axis
+        ctx.keepdims = keepdims
+        out = np.min(a.data, axis=axis, keepdims=keepdims)
+        ctx.out = out
+        return out
+
+    @staticmethod
+    def backward(ctx: Context, grad_output):
+        (a,) = ctx.saved_tensors
+        axis = ctx.axis
+        keepdims = ctx.keepdims
+        out = ctx.out
+
+        if not keepdims and axis is not None:
+            grad_output = np.expand_dims(grad_output, axis)
+
+        mask = (a.data == out)
+        count = np.sum(mask, axis=axis, keepdims=True)
+        grad = grad_output * mask / count
+        return grad
 
 
 class Sum(Function):

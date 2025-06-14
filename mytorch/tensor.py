@@ -6,8 +6,8 @@ from .utils import ensure_tensor
 
 
 class Tensor:
-    def __init__(self, data, frozen=False):
-        self.data = np.array(data, dtype=np.float32)
+    def __init__(self, data, dtype=np.float32, frozen=False):
+        self.data = np.array(data, dtype=dtype)
         self.grad = np.zeros_like(self.data) if not frozen else None
         self.frozen = frozen
         self._ctx: Context | None = Context()
@@ -16,6 +16,60 @@ class Tensor:
 
     def __repr__(self):
         return f"Tensor(data={self.data}, grad={self.grad})"
+
+    def __str__(self):
+        return f"Tensor(data={self.data}, grad={self.grad})"
+
+    def item(self):
+        if self.data.size != 1:
+            raise ValueError("Tensor must be scalar to call item()")
+        return self.data.item()
+
+    @property
+    def shape(self):
+        return self.data.shape
+
+    @property
+    def dtype(self):
+        return self.data.dtype
+
+    @property
+    def device(self):
+        return "cpu"
+
+    def astype(self, dtype):
+        return Tensor(self.data.astype(dtype), dtype=dtype, frozen=self.frozen)
+
+    def freeze(self):
+        if self.grad is not None:
+            self.grad.fill(0)
+        self.frozen = True
+
+    def unfreeze(self):
+        if self.frozen:
+            self.grad = np.zeros_like(self.data)
+            self.frozen = False
+
+    def to(self, device):
+        if device != "cpu":
+            raise NotImplementedError("Only 'cpu' device is supported.")
+        return self
+
+    def detach(self):
+        detached_tensor = Tensor(
+            self.data.copy(), dtype=self.dtype, frozen=True)
+        detached_tensor.grad = None
+        return detached_tensor
+
+    def clone(self):
+        cloned_tensor = Tensor(
+            self.data.copy(), dtype=self.dtype, frozen=self.frozen)
+        if self.grad is not None:
+            cloned_tensor.grad = self.grad.copy()
+        return cloned_tensor
+
+    def numpy(self):
+        return self.data.copy()
 
     def zero_grad(self):
         if self.grad is not None:
@@ -62,8 +116,20 @@ class Tensor:
     def __add__(self, other):
         return Add.apply(self, ensure_tensor(other))
 
+    def __radd__(self, other):
+        return self + other
+
+    def __sub__(self, other):
+        return Sub.apply(self, ensure_tensor(other))
+
+    def __rsub__(self, other):
+        return ensure_tensor(other) - self
+
     def __mul__(self, other):
         return Mul.apply(self, ensure_tensor(other))
+
+    def __rmul__(self, other):
+        return self * other
 
     def __matmul__(self, other):
         return MatMul.apply(self, ensure_tensor(other))
@@ -71,14 +137,62 @@ class Tensor:
     def __truediv__(self, other):
         return Div.apply(self, ensure_tensor(other))
 
+    def __rtruediv__(self, other):
+        return ensure_tensor(other) / self
+
+    def __pow__(self, power):
+        return Pow.apply(self, ensure_tensor(power))
+
+    def __rpow__(self, base):
+        return Pow.apply(ensure_tensor(base), self)
+
+    def __eq__(self, other):
+        return Equal.apply(self, ensure_tensor(other))
+
+    def __ne__(self, other):
+        return NotEqual.apply(self, ensure_tensor(other))
+
+    def __lt__(self, other):
+        return Less.apply(self, ensure_tensor(other))
+
+    def __le__(self, other):
+        return LessEqual.apply(self, ensure_tensor(other))
+
+    def __gt__(self, other):
+        return Greater.apply(self, ensure_tensor(other))
+
+    def __ge__(self, other):
+        return GreaterEqual.apply(self, ensure_tensor(other))
+
     def exp(self):
         return Exp.apply(self)
 
     def log(self):
         return Log.apply(self)
 
+    def sum(self, axis=None, keepdims=False):
+        return Sum.apply(self, axis=axis, keepdims=keepdims)
+
+    def abs(self):
+        return Abs.apply(self)
+
+    def max(self, axis=None, keepdims=False):
+        return Max.apply(self, axis=axis, keepdims=keepdims)
+
+    def min(self, axis=None, keepdims=False):
+        return Min.apply(self, axis=axis, keepdims=keepdims)
+
+    def mean(self):
+        return Mean.apply(self)
+
+    def relu(self):
+        return ReLU.apply(self)
+
     def sigmoid(self):
         return Sigmoid.apply(self)
+
+    def log_softmax(self, dim):
+        return LogSoftmax.apply(self, dim)
 
     def tanh(self):
         return Tanh.apply(self)
@@ -95,14 +209,6 @@ class Tensor:
     def clip(self, min_val, max_val):
         return Clip.apply(self, min_val, max_val)
 
-    def sum(self, axis=None, keepdims=False):
-        return Sum.apply(self, axis=axis, keepdims=keepdims)
-
-    def mean(self):
-        return Mean.apply(self)
-
-    def relu(self):
-        return ReLU.apply(self)
-
-    def log_softmax(self, dim):
-        return LogSoftmax.apply(self, dim)
+    @staticmethod
+    def where(condition, x, y):
+        return Where.apply(ensure_tensor(condition), ensure_tensor(x), ensure_tensor(y))

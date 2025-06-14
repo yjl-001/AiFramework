@@ -23,7 +23,7 @@ class Function:
         result = cls.forward(ctx, *inputs, **kwargs)
 
         # 包装成 Tensor（构建计算图）
-        out = Tensor(result)
+        out = Tensor(result, dtype=result.dtype)
         out._ctx = ctx
         out._ctx.inputs = inputs  # 保存原始输入 Tensor
         out._backward_fn = cls    # 指定反向传播要用的类
