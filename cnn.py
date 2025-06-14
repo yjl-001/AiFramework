@@ -4,7 +4,10 @@ from mytorch.opt import Adam
 from mytorch.dataset import DataLoader, MNISTDataset
 from mytorch import no_grad
 from mytorch.nn.loss import cross_entropy_loss
-from mytorch.backend import xp
+
+from mytorch.backend import set_backend
+
+set_backend("cpu")
 
 
 class SimpleCNN(Module):

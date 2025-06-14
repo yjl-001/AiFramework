@@ -6,10 +6,6 @@ from mytorch.dataset import DataLoader, MNISTDataset
 from mytorch import no_grad
 from mytorch.nn.loss import cross_entropy_loss
 
-import numpy as np
-
-import time
-
 
 class MLP(Module):
     def __init__(self):
@@ -48,7 +44,6 @@ def train(model: Module, dataloader: DataLoader, optimizer: Optimizer, epoch):
         # 前向传播
         logits = model(x)
         loss = cross_entropy_loss(logits, y)
-        print(f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss.item():.4f}")
 
         # 反向传播
         optimizer.zero_grad()
