@@ -1,4 +1,4 @@
-import numpy as np
+from mytorch.backend import xp
 from .function import Function, Context
 
 
@@ -90,13 +90,13 @@ class MatMul(Function):
     @staticmethod
     def forward(ctx: Context, a, b):
         ctx.save_for_backward(a, b)
-        return np.matmul(a.data, b.data)
+        return xp.matmul(a.data, b.data)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
         a, b = ctx.saved_tensors
-        grad_a = np.matmul(grad_output, np.swapaxes(b.data, -1, -2))
-        grad_b = np.matmul(np.swapaxes(a.data, -1, -2), grad_output)
+        grad_a = xp.matmul(grad_output, xp.swapaxes(b.data, -1, -2))
+        grad_b = xp.matmul(xp.swapaxes(a.data, -1, -2), grad_output)
         grad_a = unbroadcast(grad_a, a.data.shape)
         grad_b = unbroadcast(grad_b, b.data.shape)
         return grad_a, grad_b
@@ -114,7 +114,7 @@ class Pow(Function):
     def backward(ctx: Context, grad_output):
         a, b = ctx.saved_tensors
         grad_a = grad_output * b.data * (a.data ** (b.data - 1))
-        grad_b = grad_output * (a.data ** b.data) * np.log(a.data + 1e-10)
+        grad_b = grad_output * (a.data ** b.data) * xp.log(a.data + 1e-10)
         grad_a = unbroadcast(grad_a, a.data.shape)
         grad_b = unbroadcast(grad_b, b.data.shape)
         return grad_a, grad_b
@@ -125,7 +125,7 @@ class Sqrt(Function):
 
     @staticmethod
     def forward(ctx: Context, a):
-        out = np.sqrt(a.data)
+        out = xp.sqrt(a.data)
         ctx.save_for_backward(a)
         ctx.out = out
         return out
@@ -133,7 +133,7 @@ class Sqrt(Function):
     @staticmethod
     def backward(ctx: Context, grad_output):
         (a,) = ctx.saved_tensors
-        return grad_output * 0.5 / np.sqrt(a.data)
+        return grad_output * 0.5 / xp.sqrt(a.data)
 
 
 class Exp(Function):
@@ -141,7 +141,7 @@ class Exp(Function):
 
     @staticmethod
     def forward(ctx: Context, a):
-        out = np.exp(a.data)
+        out = xp.exp(a.data)
         ctx.save_for_backward(a)
         ctx.out = out
         return out
@@ -157,7 +157,7 @@ class Log(Function):
     @staticmethod
     def forward(ctx: Context, a):
         ctx.save_for_backward(a)
-        return np.log(a.data)
+        return xp.log(a.data)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -171,12 +171,12 @@ class Abs(Function):
     @staticmethod
     def forward(ctx: Context, a):
         ctx.save_for_backward(a)
-        return np.abs(a.data)
+        return xp.abs(a.data)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
         (a,) = ctx.saved_tensors
-        return grad_output * np.sign(a.data)
+        return grad_output * xp.sign(a.data)
 
 
 class ReLU(Function):
@@ -185,7 +185,7 @@ class ReLU(Function):
     @staticmethod
     def forward(ctx: Context, a):
         ctx.save_for_backward(a)
-        return np.maximum(0, a.data)
+        return xp.maximum(0, a.data)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -198,7 +198,7 @@ class Sigmoid(Function):
 
     @staticmethod
     def forward(ctx: Context, a):
-        out = 1 / (1 + np.exp(-a.data))
+        out = 1 / (1 + xp.exp(-a.data))
         ctx.save_for_backward(out)
         return out
 
@@ -213,7 +213,7 @@ class Tanh(Function):
 
     @staticmethod
     def forward(ctx: Context, a):
-        out = np.tanh(a.data)
+        out = xp.tanh(a.data)
         ctx.save_for_backward(out)
         return out
 
@@ -239,8 +239,8 @@ class Sum(Function):
         axis = ctx.axis
         keepdims = ctx.keepdims
         if not keepdims and axis is not None:
-            grad_output = np.expand_dims(grad_output, axis)
-        return grad_output * np.ones_like(a.data)
+            grad_output = xp.expand_dims(grad_output, axis)
+        return grad_output * xp.ones_like(a.data)
 
 
 class Mean(Function):
@@ -250,12 +250,12 @@ class Mean(Function):
     def forward(ctx: Context, a):
         ctx.save_for_backward(a)
         ctx.input_shape = a.data.shape
-        return np.array(a.data.mean(), dtype=np.float32)
+        return xp.array(a.data.mean(), dtype=xp.float32)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
         shape = ctx.input_shape
-        return grad_output * np.ones(shape, dtype=np.float32) / np.prod(shape)
+        return grad_output * xp.ones(shape, dtype=xp.float32) / xp.prod(shape)
 
 
 class Max(Function):
@@ -266,7 +266,7 @@ class Max(Function):
         ctx.save_for_backward(a)
         ctx.axis = axis
         ctx.keepdims = keepdims
-        out = np.max(a.data, axis=axis, keepdims=keepdims)
+        out = xp.max(a.data, axis=axis, keepdims=keepdims)
         ctx.out = out
         return out
 
@@ -277,9 +277,9 @@ class Max(Function):
         keepdims = ctx.keepdims
         out = ctx.out
         if not keepdims and axis is not None:
-            grad_output = np.expand_dims(grad_output, axis)
+            grad_output = xp.expand_dims(grad_output, axis)
         mask = (a.data == out)
-        count = np.sum(mask, axis=axis, keepdims=True)
+        count = xp.sum(mask, axis=axis, keepdims=True)
         return grad_output * mask / count
 
 
@@ -291,7 +291,7 @@ class Min(Function):
         ctx.save_for_backward(a)
         ctx.axis = axis
         ctx.keepdims = keepdims
-        out = np.min(a.data, axis=axis, keepdims=keepdims)
+        out = xp.min(a.data, axis=axis, keepdims=keepdims)
         ctx.out = out
         return out
 
@@ -302,9 +302,9 @@ class Min(Function):
         keepdims = ctx.keepdims
         out = ctx.out
         if not keepdims and axis is not None:
-            grad_output = np.expand_dims(grad_output, axis)
+            grad_output = xp.expand_dims(grad_output, axis)
         mask = (a.data == out)
-        count = np.sum(mask, axis=axis, keepdims=True)
+        count = xp.sum(mask, axis=axis, keepdims=True)
         return grad_output * mask / count
 
 
@@ -314,7 +314,7 @@ class ArgMax(Function):
     @staticmethod
     def forward(ctx: Context, a, dim=None):
         ctx.save_for_backward()
-        return np.argmax(a.data, axis=dim)
+        return xp.argmax(a.data, axis=dim)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -327,7 +327,7 @@ class ArgMin(Function):
     @staticmethod
     def forward(ctx: Context, a, dim=None):
         ctx.save_for_backward()
-        return np.argmin(a.data, axis=dim)
+        return xp.argmin(a.data, axis=dim)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -355,12 +355,12 @@ class Transpose(Function):
     def forward(ctx: Context, a, axes):
         ctx.save_for_backward(a)
         ctx.axes = axes
-        return np.transpose(a.data, axes)
+        return xp.transpose(a.data, axes)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
-        reverse_axes = np.argsort(ctx.axes)
-        return np.transpose(grad_output, reverse_axes), None
+        reverse_axes = xp.argsort(ctx.axes)
+        return xp.transpose(grad_output, reverse_axes), None
 
 
 class Flatten(Function):
@@ -385,7 +385,7 @@ class Clip(Function):
         ctx.save_for_backward(a)
         ctx.min_val = min_val
         ctx.max_val = max_val
-        return np.clip(a.data, min_val, max_val)
+        return xp.clip(a.data, min_val, max_val)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -401,7 +401,7 @@ class Equal(Function):
 
     @staticmethod
     def forward(ctx: Context, a, b):
-        return (a.data == b.data).astype(np.float32)
+        return (a.data == b.data).astype(xp.float32)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -413,7 +413,7 @@ class NotEqual(Function):
 
     @staticmethod
     def forward(ctx: Context, a, b):
-        return (a.data != b.data).astype(np.float32)
+        return (a.data != b.data).astype(xp.float32)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -425,7 +425,7 @@ class Less(Function):
 
     @staticmethod
     def forward(ctx: Context, a, b):
-        return (a.data < b.data).astype(np.float32)
+        return (a.data < b.data).astype(xp.float32)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -437,7 +437,7 @@ class LessEqual(Function):
 
     @staticmethod
     def forward(ctx: Context, a, b):
-        return (a.data <= b.data).astype(np.float32)
+        return (a.data <= b.data).astype(xp.float32)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -449,7 +449,7 @@ class Greater(Function):
 
     @staticmethod
     def forward(ctx: Context, a, b):
-        return (a.data > b.data).astype(np.float32)
+        return (a.data > b.data).astype(xp.float32)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -461,7 +461,7 @@ class GreaterEqual(Function):
 
     @staticmethod
     def forward(ctx: Context, a, b):
-        return (a.data >= b.data).astype(np.float32)
+        return (a.data >= b.data).astype(xp.float32)
 
     @staticmethod
     def backward(ctx: Context, grad_output):

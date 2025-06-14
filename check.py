@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-import numpy as np
 from mytorch.dataset import MNISTDataset
+from mytorch.backend import xp
 
 
 def check_dataset(dataset, num_samples=10):

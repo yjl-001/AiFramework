@@ -1,4 +1,4 @@
-import numpy as np
+from mytorch.backend import xp
 from .function import Function, Context
 
 
@@ -20,14 +20,14 @@ class GetItem(Function):
         if isinstance(idx, tuple):
             idx = tuple(
                 i.data if isinstance(i, Tensor) else
-                np.array(i) if isinstance(i, range) else
+                xp.array(i) if isinstance(i, range) else
                 i
                 for i in idx
             )
         elif isinstance(idx, Tensor):
             idx = idx.data
         elif isinstance(idx, range):
-            idx = np.array(idx)
+            idx = xp.array(idx)
 
         ctx.save_for_backward(x)
         ctx.idx = idx
@@ -36,7 +36,7 @@ class GetItem(Function):
     @staticmethod
     def backward(ctx: Context, grad_output):
         (x,) = ctx.saved_tensors
-        grad = np.zeros_like(x.data, dtype=np.float32)
+        grad = xp.zeros_like(x.data, dtype=xp.float32)
         grad[ctx.idx] = grad_output
         return grad, None
 
@@ -45,7 +45,7 @@ class Where(Function):
     @staticmethod
     def forward(ctx: Context, condition, x, y):
         ctx.save_for_backward(condition, x, y)
-        return np.where(condition.data.astype(bool), x.data, y.data)
+        return xp.where(condition.data.astype(bool), x.data, y.data)
 
     @staticmethod
     def backward(ctx: Context, grad_output):
@@ -65,12 +65,12 @@ class LogSoftmax(Function):
     @staticmethod
     def forward(ctx: Context, x, dim):
         ctx.dim = dim
-        x_max = np.max(x.data, axis=dim, keepdims=True)
+        x_max = xp.max(x.data, axis=dim, keepdims=True)
         shifted = x.data - x_max
-        exp = np.exp(shifted)
-        sum_exp = np.sum(exp, axis=dim, keepdims=True)
+        exp = xp.exp(shifted)
+        sum_exp = xp.sum(exp, axis=dim, keepdims=True)
         softmax = exp / sum_exp
-        log_softmax = np.log(softmax + 1e-9)  # 加 epsilon 防止 log(0)
+        log_softmax = xp.log(softmax + 1e-9)  # 加 epsilon 防止 log(0)
 
         ctx.softmax = softmax
         return log_softmax
@@ -80,5 +80,5 @@ class LogSoftmax(Function):
         softmax = ctx.softmax
         dim = ctx.dim
         grad_input = grad_output - \
-            np.sum(grad_output * softmax, axis=dim, keepdims=True) * softmax
+            xp.sum(grad_output * softmax, axis=dim, keepdims=True) * softmax
         return grad_input, None

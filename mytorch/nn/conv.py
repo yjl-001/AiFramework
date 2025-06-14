@@ -2,7 +2,7 @@ from .module import Module
 from mytorch.tensor import Tensor
 from mytorch.ops.conv import *
 
-import numpy as np
+from mytorch.backend import xp
 
 
 class Conv2d(Module):
@@ -24,9 +24,9 @@ class Conv2d(Module):
 
         # 初始化权重和偏置
         weight_shape = (out_channels, in_channels, *kernel_size)
-        self.weight = Tensor(np.random.randn(
-            *weight_shape) * np.sqrt(2. / (in_channels * np.prod(kernel_size))))
-        self.bias = Tensor(np.zeros((out_channels,)))
+        self.weight = Tensor(xp.random.randn(
+            *weight_shape) * xp.sqrt(2. / (in_channels * xp.prod(kernel_size))))
+        self.bias = Tensor(xp.zeros((out_channels,)))
 
     def forward(self, x):
         return Conv2dFunction.apply(x, self.weight, self.bias, self.stride, self.padding)

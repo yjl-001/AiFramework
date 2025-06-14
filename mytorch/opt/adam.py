@@ -1,6 +1,6 @@
 from .optimizer import Optimizer
 
-import numpy as np
+from mytorch.backend import xp
 
 
 class Adam(Optimizer):
@@ -9,8 +9,8 @@ class Adam(Optimizer):
         self.lr = lr
         self.betas = betas
         self.eps = eps
-        self.m = [np.zeros_like(p.data) for p in self.params]
-        self.v = [np.zeros_like(p.data) for p in self.params]
+        self.m = [xp.zeros_like(p.data) for p in self.params]
+        self.v = [xp.zeros_like(p.data) for p in self.params]
         self.t = 0
 
     def step(self):
@@ -26,4 +26,4 @@ class Adam(Optimizer):
             m_hat = self.m[i] / (1 - self.betas[0] ** self.t)
             v_hat = self.v[i] / (1 - self.betas[1] ** self.t)
 
-            param.data -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+            param.data -= self.lr * m_hat / (xp.sqrt(v_hat) + self.eps)

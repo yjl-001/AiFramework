@@ -1,4 +1,4 @@
-import numpy as np
+from mytorch.backend import xp
 from .ops.function import Function, Context
 from .ops.basic import *
 from .ops.advanced import *
@@ -31,10 +31,10 @@ def no_grad():
 
 
 class Tensor:
-    def __init__(self, data, dtype=np.float32, frozen=False):
+    def __init__(self, data, dtype=xp.float32, frozen=False):
         frozen = frozen or not is_grad_enabled()
-        self.data = np.array(data, dtype=dtype)
-        self.grad = np.zeros_like(self.data) if not frozen else None
+        self.data = xp.array(data, dtype=dtype)
+        self.grad = xp.zeros_like(self.data) if not frozen else None
         self.frozen = frozen
         self._ctx: Context | None = Context()
         self._backward_fn: type[Function] | None = None
@@ -69,13 +69,13 @@ class Tensor:
         return Tensor(self.data.astype(dtype), dtype=dtype, frozen=self.frozen)
 
     def float(self):
-        return self.astype(np.float32)
+        return self.astype(xp.float32)
 
     def int(self):
-        return self.astype(np.int32)
+        return self.astype(xp.int32)
 
     def long(self):
-        return self.astype(np.int64)
+        return self.astype(xp.int64)
 
     def freeze(self):
         if self.grad is not None:
@@ -84,7 +84,7 @@ class Tensor:
 
     def unfreeze(self):
         if self.frozen:
-            self.grad = np.zeros_like(self.data)
+            self.grad = xp.zeros_like(self.data)
             self.frozen = False
 
     def to(self, device):
@@ -114,11 +114,11 @@ class Tensor:
 
     @classmethod
     def zeros_like(cls, other):
-        return cls(np.zeros_like(other.data), frozen=other.frozen)
+        return cls(xp.zeros_like(other.data), frozen=other.frozen)
 
     def backward(self, grad=None):
         if grad is None:
-            grad = np.ones_like(self.data)
+            grad = xp.ones_like(self.data)
 
         self.grad = grad
 

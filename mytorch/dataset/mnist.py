@@ -1,5 +1,5 @@
 import os
-import numpy as np
+from mytorch.backend import xp
 import csv
 
 
@@ -27,7 +27,7 @@ class MNISTDataset:
         # 如果启用缓存并且缓存文件存在，直接加载
         if self.use_cache and os.path.exists(cache_path):
             print(f"📦 正在从缓存加载数据: {cache_path}")
-            data = np.load(cache_path)
+            data = xp.load(cache_path)
             self.images = data['images']
             self.labels = data['labels']
             print(f"✅ 加载完成: {len(self.labels)} 个样本")
@@ -46,19 +46,19 @@ class MNISTDataset:
             next(reader)  # 跳过表头
             for row in reader:
                 label = int(row[0])
-                pixels = np.array(row[1:], dtype=np.uint8).reshape(1, 28, 28)
+                pixels = xp.array(row[1:], dtype=xp.uint8).reshape(1, 28, 28)
                 images.append(pixels)
                 labels.append(label)
 
-        self.images = np.stack(images)
-        self.labels = np.array(labels)
+        self.images = xp.stack(images)
+        self.labels = xp.array(labels)
 
         print(f"✅ 加载完成: {len(self.labels)} 个样本")
 
         # 保存为缓存文件
         if self.use_cache:
             print(f"💾 正在保存缓存文件: {cache_path}")
-            np.savez_compressed(
+            xp.savez_compressed(
                 cache_path, images=self.images, labels=self.labels)
             print("✅ 缓存保存完成")
 

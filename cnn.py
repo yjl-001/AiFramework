@@ -4,8 +4,7 @@ from mytorch.opt import Adam
 from mytorch.dataset import DataLoader, MNISTDataset
 from mytorch import no_grad
 from mytorch.nn.loss import cross_entropy_loss
-
-import numpy as np
+from mytorch.backend import xp
 
 
 class SimpleCNN(Module):
