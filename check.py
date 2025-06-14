@@ -13,8 +13,8 @@ def check_dataset(dataset, num_samples=10):
     # 检查第一个样本
     try:
         image, label = dataset[0]
-        assert isinstance(image, np.ndarray), "图像不是 NumPy 数组"
-        assert isinstance(label, (int, np.integer)), "标签不是整数"
+        assert isinstance(image, xp.ndarray), "图像不是 NumPy 数组"
+        assert isinstance(label, (int, xp.integer)), "标签不是整数"
         assert image.shape == (1, 28, 28), f"图像 shape 错误: {image.shape}"
         assert 0 <= label <= 9, f"标签超出范围: {label}"
         print("✅ 第一个样本格式正确")
