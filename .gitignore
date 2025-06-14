@@ -7,3 +7,4 @@ MLP/result/
 *.pyc
 *.npy
 __pycache__
+data/
