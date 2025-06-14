@@ -9,7 +9,7 @@ class Layer:
     def forward(self, input):
         raise NotImplementedError
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         raise NotImplementedError
 
 class Conv2D(Layer):
@@ -24,6 +24,22 @@ class Conv2D(Layer):
         # Initialize weights and biases
         self.weights = np.random.randn(num_filters, input_shape[0], kernel_size, kernel_size)
         self.biases = np.random.randn(num_filters, 1)
+        self.weights_gradient = np.zeros_like(self.weights)
+        self.biases_gradient = np.zeros_like(self.biases)
+        self._accumulated_weights_grad = np.zeros_like(self.weights)
+        self._accumulated_biases_grad = np.zeros_like(self.biases)
+
+    def zero_grad(self):
+        self._accumulated_weights_grad = np.zeros_like(self.weights)
+        self._accumulated_biases_grad = np.zeros_like(self.biases)
+
+    def accumulate_grad(self):
+        self._accumulated_weights_grad += self.weights_gradient
+        self._accumulated_biases_grad += self.biases_gradient
+
+    def apply_accumulated_grad(self, learning_rate):
+        self.weights -= learning_rate * self._accumulated_weights_grad
+        self.biases -= learning_rate * self._accumulated_biases_grad
 
     def forward(self, input):
         self.input = input
@@ -41,7 +57,7 @@ class Conv2D(Layer):
         self.output = out
         return self.output
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         N, C, H, W = self.input.shape
         FN, C, FH, FW = self.weights.shape
         out_h = (H + 2 * self.padding - FH) // self.stride + 1
@@ -61,10 +77,8 @@ class Conv2D(Layer):
         dcol = np.dot(dout, self.weights.reshape(FN, -1))
         input_gradient = col2im(dcol, self.input.shape, FH, FW, self.stride, self.padding)
 
-        # Update weights and biases
-        self.weights -= learning_rate * self.weights_gradient
-        self.biases -= learning_rate * self.biases_gradient
-
+        # Gradients are stored in self.weights_gradient and self.biases_gradient
+        # Updates will be handled by the optimizer
         return input_gradient
 
 class MaxPooling2D(Layer):
@@ -98,7 +112,7 @@ class MaxPooling2D(Layer):
                         self.mask[b, c, h_start + max_idx[0], w_start + max_idx[1]] = 1
         return self.output
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         dx = np.zeros_like(self.input)
         batch_size, channels, out_height, out_width = output_gradient.shape
 
@@ -171,7 +185,7 @@ class Flatten(Layer):
         self.original_shape = input.shape
         return input.reshape(input.shape[0], -1)
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         return output_gradient.reshape(self.original_shape)
 
 class FullyConnected(Layer):
@@ -179,18 +193,35 @@ class FullyConnected(Layer):
         super().__init__()
         self.weights = np.random.randn(input_size, output_size) * 0.01
         self.biases = np.zeros((1, output_size))
+        self.weights_gradient = np.zeros_like(self.weights)
+        self.biases_gradient = np.zeros_like(self.biases)
+        self._accumulated_weights_grad = np.zeros_like(self.weights)
+        self._accumulated_biases_grad = np.zeros_like(self.biases)
+
+    def zero_grad(self):
+        self._accumulated_weights_grad = np.zeros_like(self.weights)
+        self._accumulated_biases_grad = np.zeros_like(self.biases)
+
+    def accumulate_grad(self):
+        self._accumulated_weights_grad += self.weights_gradient
+        self._accumulated_biases_grad += self.biases_gradient
+
+    def apply_accumulated_grad(self, learning_rate):
+        self.weights -= learning_rate * self._accumulated_weights_grad
+        self.biases -= learning_rate * self._accumulated_biases_grad
 
     def forward(self, input):
         self.input = input
         return np.dot(input, self.weights) + self.biases
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         weights_gradient = np.dot(self.input.T, output_gradient)
         biases_gradient = np.sum(output_gradient, axis=0, keepdims=True)
         input_gradient = np.dot(output_gradient, self.weights.T)
 
-        self.weights -= learning_rate * weights_gradient
-        self.biases -= learning_rate * biases_gradient
+        self.weights_gradient = weights_gradient # Store gradients
+        self.biases_gradient = biases_gradient   # Store gradients
+        # Updates will be handled by the optimizer
         return input_gradient
 
 class Dropout(Layer):
@@ -206,7 +237,7 @@ class Dropout(Layer):
             return input * self.mask
         return input
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         if self.rate > 0:
             return output_gradient * self.mask
         return output_gradient
@@ -221,6 +252,22 @@ class BatchNorm2D(Layer):
         self.beta = np.zeros((1, num_features, 1, 1))
         self.running_mean = np.zeros((1, num_features, 1, 1))
         self.running_var = np.ones((1, num_features, 1, 1))
+        self.gamma_gradient = np.zeros_like(self.gamma)
+        self.beta_gradient = np.zeros_like(self.beta)
+        self._accumulated_gamma_grad = np.zeros_like(self.gamma)
+        self._accumulated_beta_grad = np.zeros_like(self.beta)
+
+    def zero_grad(self):
+        self._accumulated_gamma_grad = np.zeros_like(self.gamma)
+        self._accumulated_beta_grad = np.zeros_like(self.beta)
+
+    def accumulate_grad(self):
+        self._accumulated_gamma_grad += self.gamma_gradient
+        self._accumulated_beta_grad += self.beta_gradient
+
+    def apply_accumulated_grad(self, learning_rate):
+        self.gamma -= learning_rate * self._accumulated_gamma_grad
+        self.beta -= learning_rate * self._accumulated_beta_grad
 
     def forward(self, input, training=True):
         self.input = input
@@ -236,7 +283,7 @@ class BatchNorm2D(Layer):
             self.output = self.gamma * self.x_norm + self.beta
         return self.output
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         N, C, H, W = self.input.shape
 
         # Gradients for beta
@@ -261,10 +308,9 @@ class BatchNorm2D(Layer):
              dvar * 2 * (self.input - mean) / N / C / H / W +\
              dmean / N / C / H / W
 
-        # Update gamma and beta
-        self.gamma -= learning_rate * dgamma
-        self.beta -= learning_rate * dbeta
-
+        self.gamma_gradient = dgamma # Store gradients
+        self.beta_gradient = dbeta   # Store gradients
+        # Updates will be handled by the optimizer
         return dx
 
 class ResidualBlock(Layer):
@@ -296,7 +342,7 @@ class ResidualBlock(Layer):
         self.output = out + residual
         return self.output
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         # Gradient for the addition operation is simply the output_gradient passed to both paths
         d_residual = output_gradient
 
@@ -326,7 +372,7 @@ class Route(Layer):
         self.output = np.concatenate(inputs, axis=1)
         return self.output
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         # Distribute the gradient back to the original input paths
         # This requires knowing the original shapes of the concatenated inputs
         gradients = []
@@ -389,7 +435,7 @@ class YoloOutput(Layer):
         self.output = np.concatenate([box_x, box_y, box_w, box_h, objectness, class_probabilities], axis=-1)
         return self.output
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient):
         # Placeholder for backward pass, will be handled during YOLO loss calculation
         pass
 

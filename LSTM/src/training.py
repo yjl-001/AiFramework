@@ -1,7 +1,7 @@
 # LSTM/src/training.py
 import numpy as np
 import time
-from .utils import batch_iterator, calculate_bleu_score # Assuming BLEU score is in utils
+from .utils import batch_iterator, bleu_score # Assuming BLEU score is in utils
 from .losses import get_loss # For loss calculation if not handled by model directly
 
 class Trainer:
@@ -36,14 +36,15 @@ class Trainer:
         else:
             predictions_logits, cache = self.model.forward(X_batch, training=True)
         
-        loss_value, d_loss_logits = self.loss_func(predictions_logits, Y_batch)
+        loss_value = self.loss_func.loss(predictions_logits, Y_batch)
+        d_loss_logits = self.loss_func.gradient(predictions_logits, Y_batch)
         
         # Gradients for all trainable parameters
         param_gradients = self.model.backward(d_loss_logits, cache)
         
         # Update parameters using the optimizer
         # The optimizer needs all model parameters and their corresponding gradients
-        all_params = self.model.get_parameters() # Ensure this gets all relevant params
+        all_params = self.model.trainable_parameters # Ensure this gets all relevant params
         self.optimizer.update(all_params, param_gradients)
         
         return loss_value, predictions_logits
@@ -92,7 +93,7 @@ class Trainer:
                     epoch_loss += loss
                     num_batches += 1
             else: # Standard case
-                for X_batch_current, Y_batch_current in batch_iterator(X_train, Y_train, batch_size, shuffle=shuffle):
+                for X_batch_current, Y_batch_current in batch_iterator((X_train, Y_train), batch_size, shuffle=shuffle):
                     loss, _ = self.train_step(X_batch_current, Y_batch_current)
                     epoch_loss += loss
                     num_batches += 1
@@ -152,7 +153,7 @@ class Trainer:
                 X_batch_current = X_test[batch_indices]
                 predictions_logits, _ = self.model.forward(X_batch_current, training=False)
             
-            loss, _ = self.loss_func(predictions_logits, Y_batch_current)
+            loss = self.loss_func.loss(predictions_logits, Y_batch_current)
             total_loss += loss
             num_batches += 1
             

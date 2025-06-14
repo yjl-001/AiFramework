@@ -35,6 +35,57 @@ class BinaryCrossentropy(Loss):
         return ((1 - y_true) / (1 - y_pred) - y_true / y_pred) / y_true.size
 
 
+class TripletLoss(Loss):
+    def __init__(self, margin=0.2):
+        self.margin = margin
+
+    def loss(self, anchor, positive, negative):
+        """
+        Calculates the triplet loss.
+        Args:
+            anchor (np.ndarray): Embedding for the anchor image.
+            positive (np.ndarray): Embedding for the positive image.
+            negative (np.ndarray): Embedding for the negative image.
+        Returns:
+            float: The triplet loss value.
+        """
+        pos_dist = np.sum(np.square(anchor - positive), axis=-1)
+        neg_dist = np.sum(np.square(anchor - negative), axis=-1)
+        basic_loss = pos_dist - neg_dist + self.margin
+        loss = np.maximum(basic_loss, 0.0)
+        return np.mean(loss)
+
+    def gradient(self, anchor, positive, negative):
+        """
+        Calculates the gradient of the triplet loss with respect to anchor, positive, and negative embeddings.
+        Args:
+            anchor (np.ndarray): Embedding for the anchor image.
+            positive (np.ndarray): Embedding for the positive image.
+            negative (np.ndarray): Embedding for the negative image.
+        Returns:
+            tuple: Gradients for anchor, positive, and negative embeddings.
+        """
+        pos_dist = np.sum(np.square(anchor - positive), axis=-1)
+        neg_dist = np.sum(np.square(anchor - negative), axis=-1)
+        basic_loss = pos_dist - neg_dist + self.margin
+        
+        # Mask for where loss > 0
+        mask = (basic_loss > 0).astype(anchor.dtype) # Ensure mask has same dtype as inputs
+        num_samples = anchor.shape[0]
+        if num_samples == 0:
+            return np.zeros_like(anchor), np.zeros_like(positive), np.zeros_like(negative)
+
+        # Gradient for anchor
+        grad_anchor = 2 * (negative - positive) * mask[:, np.newaxis] / num_samples
+        
+        # Gradient for positive
+        grad_positive = 2 * (positive - anchor) * mask[:, np.newaxis] / num_samples
+        
+        # Gradient for negative
+        grad_negative = 2 * (anchor - negative) * mask[:, np.newaxis] / num_samples
+        
+        return grad_anchor, grad_positive, grad_negative
+
 class YOLOLoss(Loss):
     def __init__(self, anchors, img_size, num_classes, ignore_thresh=0.5):
         self.anchors = anchors

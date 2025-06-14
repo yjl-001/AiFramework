@@ -188,6 +188,48 @@ class Model:
     def predict(self, X):
         return self.forward(X, training=False)
 
+    def save_weights(self, file_path):
+        """Saves the model's weights to a file."""
+        weights_dict = {}
+        for i, layer in enumerate(self.layers):
+            layer_prefix = f"layer_{i}_{layer.__class__.__name__}"
+            if hasattr(layer, 'weights'): # Conv2D, FullyConnected
+                weights_dict[f"{layer_prefix}_weights"] = layer.weights
+                weights_dict[f"{layer_prefix}_biases"] = layer.biases
+            if hasattr(layer, 'gamma'): # BatchNorm2D
+                weights_dict[f"{layer_prefix}_gamma"] = layer.gamma
+                weights_dict[f"{layer_prefix}_beta"] = layer.beta
+                weights_dict[f"{layer_prefix}_running_mean"] = layer.running_mean
+                weights_dict[f"{layer_prefix}_running_var"] = layer.running_var
+        np.savez(file_path, **weights_dict)
+        print(f"Model weights saved to {file_path}")
+
+    def load_weights(self, file_path):
+        """Loads the model's weights from a file."""
+        try:
+            weights_dict = np.load(file_path, allow_pickle=True)
+            for i, layer in enumerate(self.layers):
+                layer_prefix = f"layer_{i}_{layer.__class__.__name__}"
+                if hasattr(layer, 'weights'):
+                    if f"{layer_prefix}_weights" in weights_dict:
+                        layer.weights = weights_dict[f"{layer_prefix}_weights"]
+                    if f"{layer_prefix}_biases" in weights_dict:
+                        layer.biases = weights_dict[f"{layer_prefix}_biases"]
+                if hasattr(layer, 'gamma'):
+                    if f"{layer_prefix}_gamma" in weights_dict:
+                        layer.gamma = weights_dict[f"{layer_prefix}_gamma"]
+                    if f"{layer_prefix}_beta" in weights_dict:
+                        layer.beta = weights_dict[f"{layer_prefix}_beta"]
+                    if f"{layer_prefix}_running_mean" in weights_dict:
+                        layer.running_mean = weights_dict[f"{layer_prefix}_running_mean"]
+                    if f"{layer_prefix}_running_var" in weights_dict:
+                        layer.running_var = weights_dict[f"{layer_prefix}_running_var"]
+            print(f"Model weights loaded from {file_path}")
+        except FileNotFoundError:
+            print(f"Error: Weights file not found at {file_path}")
+        except Exception as e:
+            print(f"Error loading weights: {e}")
+
 class YOLOv3(Model):
     def __init__(self, input_shape, num_classes, anchors, img_size=(416, 416)):
         super().__init__()

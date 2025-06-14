@@ -75,9 +75,9 @@ def pad_sequences(sequences, max_len, padding='post', truncating='post', value=0
         
         pad_width = max_len - len(new_seq)
         if padding == 'pre':
-            padded_sequences.append([value] * pad_width + new_seq)
+            padded_sequences.append([value] * pad_width + list(new_seq))
         else: # 'post'
-            padded_sequences.append(new_seq + [value] * pad_width)
+            padded_sequences.append(list(new_seq) + [value] * pad_width)
             
     return np.array(padded_sequences)
 

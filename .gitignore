@@ -1,6 +1,9 @@
 .vscode/
+**/__pycache__
 assignment/
 MLP/dataset/
 MLP/result/
+CNN/dataset/
+CNN/result/
 .DS_Store
 .venv
