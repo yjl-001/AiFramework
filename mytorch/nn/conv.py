@@ -25,7 +25,7 @@ class Conv2d(Module):
         # 初始化权重和偏置
         weight_shape = (out_channels, in_channels, *kernel_size)
         self.weight = Tensor(xp.random.randn(
-            *weight_shape) * xp.sqrt(2. / (in_channels * xp.prod(kernel_size))))
+            *weight_shape) * xp.sqrt(2. / (in_channels * xp.prod(xp.array(kernel_size)))))
         self.bias = Tensor(xp.zeros((out_channels,)))
 
     def forward(self, x):

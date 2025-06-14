@@ -255,7 +255,7 @@ class Mean(Function):
     @staticmethod
     def backward(ctx: Context, grad_output):
         shape = ctx.input_shape
-        return grad_output * xp.ones(shape, dtype=xp.float32) / xp.prod(shape)
+        return grad_output * xp.ones(shape, dtype=xp.float32) / xp.prod(xp.array(shape))
 
 
 class Max(Function):
