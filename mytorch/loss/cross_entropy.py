@@ -1,4 +1,4 @@
-from ..tensor import Tensor
+from mytorch.tensor import Tensor
 
 from mytorch.backend import xp
 

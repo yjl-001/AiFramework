@@ -1,4 +1,4 @@
-from mytorch.nn.loss import cross_entropy_loss
+from mytorch.loss import cross_entropy_loss
 from mytorch.grad import no_grad
 from mytorch.utils.dataset import DataLoader, MNISTDataset
 from mytorch.opt import Adam

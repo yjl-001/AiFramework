@@ -4,10 +4,8 @@ from mytorch.nn.linear import Linear
 from mytorch.opt import Optimizer, Adam
 from mytorch.utils.dataset import DataLoader, MNISTDataset
 from mytorch.grad import no_grad
-from mytorch.nn.loss import cross_entropy_loss
-from mytorch.backend import xp, set_backend
-
-set_backend("cpu")
+from mytorch.loss import cross_entropy_loss
+from mytorch.backend import xp
 
 
 class MLP(Module):

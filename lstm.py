@@ -1,7 +1,7 @@
 from mytorch.utils.tokenizer import Tokenizer
 from mytorch.utils.dataset import IMDBDataset, DataLoader
 from mytorch.nn import Module, Linear
-from mytorch.nn.loss import cross_entropy_loss
+from mytorch.loss import cross_entropy_loss
 from mytorch.tensor import Tensor
 from mytorch.backend import xp
 from mytorch.opt import Adam
