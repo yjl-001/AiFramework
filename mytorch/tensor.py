@@ -3,6 +3,7 @@ from .backend import xp
 from .ops.function import Function, Context
 from .ops.basic import *
 from .ops.advanced import *
+from .ops.activations import *
 
 
 def ensure_tensor(x):
@@ -244,6 +245,15 @@ class Tensor:
 
     def sigmoid(self):
         return Sigmoid.apply(self)
+
+    def tanh(self):
+        return Tanh.apply(self)
+
+    def leaky_relu(self, negative_slope=0.01):
+        return LeakyReLU.apply(self, negative_slope)
+
+    def elu(self, alpha=1.0):
+        return ELU.apply(self, alpha)
 
     def log_softmax(self, dim):
         return LogSoftmax.apply(self, dim)

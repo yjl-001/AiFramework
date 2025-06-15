@@ -179,34 +179,6 @@ class Abs(Function):
         return grad_output * xp.sign(a.data)
 
 
-class ReLU(Function):
-    op = 'relu'
-
-    @staticmethod
-    def forward(ctx: Context, a):
-        ctx.save_for_backward(a)
-        return xp.maximum(0, a.data)
-
-    @staticmethod
-    def backward(ctx: Context, grad_output):
-        (a,) = ctx.saved_tensors
-        return grad_output * (a.data > 0).astype(a.data.dtype)
-
-
-class Sigmoid(Function):
-    op = 'sigmoid'
-
-    @staticmethod
-    def forward(ctx: Context, a):
-        out = 1 / (1 + xp.exp(-a.data))
-        ctx.out = out
-        return out
-
-    @staticmethod
-    def backward(ctx: Context, grad_output):
-        return grad_output * ctx.out * (1 - ctx.out)
-
-
 class Tanh(Function):
     op = 'tanh'
 
