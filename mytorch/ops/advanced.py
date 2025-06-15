@@ -1,5 +1,6 @@
 from mytorch.backend import xp
 from .function import Function, Context
+from mytorch.grad import SparseGrad
 
 
 def unbroadcast(grad, target_shape):
@@ -36,10 +37,17 @@ class GetItem(Function):
     @staticmethod
     def backward(ctx: Context, grad_output):
         (x,) = ctx.saved_tensors
-        grad = xp.zeros_like(x.data, dtype=xp.float32)
-        # grad[ctx.idx] = grad_output
-        xp.add.at(grad, ctx.idx, grad_output) # 修复重复索引的梯度错误
-        return grad, None
+        idx = ctx.idx
+
+        # 判断是否是 embedding-like 的索引（1D 整数索引）
+        if isinstance(idx, xp.ndarray) and idx.ndim == 1 and xp.issubdtype(idx.dtype, xp.integer):
+            # 稀疏梯度路径
+            return SparseGrad(indices=idx, values=grad_output, shape=x.data.shape), None
+        else:
+            # 普通 dense 路径（如 CNN 切片）
+            grad = xp.zeros_like(x.data, dtype=grad_output.dtype)
+            xp.add.at(grad, idx, grad_output)
+            return grad, None
 
 
 class Where(Function):

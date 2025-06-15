@@ -35,6 +35,27 @@ class SparseGrad:
         return f"SparseGrad(indices={self.indices}, values={self.values}, shape={self.shape})"
 
     def to_dense(self):
-        dense = xp.zeros(self.shape, dtype=self.values.dtype)
-        dense[self.indices] = self.values
-        return dense
+        grad = xp.zeros(self.shape, dtype=self.values.dtype)
+        xp.add.at(grad, self.indices, self.values)
+        return grad
+
+    def __add__(self, other):
+        if isinstance(other, SparseGrad):
+            assert self.shape == other.shape
+            indices = xp.concatenate([self.indices, other.indices], axis=0)
+            values = xp.concatenate([self.values, other.values], axis=0)
+            return SparseGrad(indices, values, self.shape)
+        elif isinstance(other, xp.ndarray):
+            return self.to_dense() + other
+        else:
+            raise TypeError(
+                f"Unsupported add between SparseGrad and {type(other)}")
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    @staticmethod
+    def from_dense(dense_grad):
+        indices = xp.nonzero(xp.any(dense_grad != 0, axis=1))[0]
+        values = dense_grad[indices]
+        return SparseGrad(indices, values, dense_grad.shape)

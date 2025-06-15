@@ -127,6 +127,19 @@ class Tensor:
 
         build_topo(self)
 
+        def add_grad(old_grad, new_grad):
+            if old_grad is None:
+                return new_grad
+            if isinstance(old_grad, SparseGrad) and isinstance(new_grad, SparseGrad):
+                # 合并两个 SparseGrad
+                return old_grad + new_grad
+            elif isinstance(old_grad, SparseGrad):
+                return old_grad + SparseGrad.from_dense(new_grad)
+            elif isinstance(new_grad, SparseGrad):
+                return SparseGrad.from_dense(old_grad) + new_grad
+            else:
+                return old_grad + new_grad
+
         for t in reversed(ordered):
             if t._backward_fn is not None:
                 grads = t._backward_fn.backward(t._ctx, t.grad)
@@ -134,7 +147,7 @@ class Tensor:
                     grads = (grads,)
                 for inp, g in zip(t._ctx.inputs, grads):
                     if isinstance(inp, Tensor):
-                        inp.grad += g
+                        inp.grad = add_grad(inp.grad, g)
 
     def __getitem__(self, idx):
         return GetItem.apply(self, idx)
