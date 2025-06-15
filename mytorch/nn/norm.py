@@ -1,4 +1,4 @@
-from mytorch.ops.batchnorm import BatchNormFunction
+from mytorch.ops.norm import *
 from .module import Module
 from mytorch.tensor import Tensor
 from mytorch.backend import xp
@@ -94,4 +94,48 @@ class BatchNorm3d(Module):
             x, self.weight, self.bias,
             self.running_mean, self.running_var,
             self.training, self.momentum, self.eps
+        )
+
+
+class LayerNorm(Module):
+    def __init__(self, normalized_shape, eps=1e-5, affine=True):
+        super().__init__()
+        self.normalized_shape = normalized_shape if isinstance(
+            normalized_shape, tuple) else (normalized_shape,)
+        self.eps = eps
+        self.affine = affine
+
+        if affine:
+            self.weight = Tensor(
+                xp.ones(self.normalized_shape, dtype=xp.float32))
+            self.bias = Tensor(
+                xp.zeros(self.normalized_shape, dtype=xp.float32))
+        else:
+            self.weight = None
+            self.bias = None
+
+    def forward(self, x):
+        return LayerNormFunction.apply(
+            x, self.weight, self.bias, self.eps
+        )
+
+
+class GroupNorm(Module):
+    def __init__(self, num_groups, num_channels, eps=1e-5, affine=True):
+        super().__init__()
+        self.num_groups = num_groups
+        self.num_channels = num_channels
+        self.eps = eps
+        self.affine = affine
+
+        if affine:
+            self.weight = Tensor(xp.ones((num_channels,), dtype=xp.float32))
+            self.bias = Tensor(xp.zeros((num_channels,), dtype=xp.float32))
+        else:
+            self.weight = None
+            self.bias = None
+
+    def forward(self, x):
+        return GroupNormFunction.apply(
+            x, self.weight, self.bias, self.num_groups, self.eps
         )
