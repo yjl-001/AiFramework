@@ -1,11 +1,22 @@
-from mytorch.tensor import Tensor
-from mytorch.ops.basic import MatMul
-from mytorch.backend import xp
+from mytorch.utils.tokenizer import Tokenizer
+from mytorch.utils.dataset import IMDBDataset
 
-x = Tensor([[1., 2., 3., 4.]], dtype=xp.float32)
-a, b = x.chunk(2, dim=1)
-y = a + b
-loss = y.sum()
-loss.backward()
+# 构建 tokenizer 并加载词表
+tokenizer = Tokenizer(max_vocab_size=10000)
+tokenizer.build_vocab_from_csv("data/imdb/imdb_master.csv")
 
-print(x.grad)  # 应该是 [[1, 1, 1, 1]]
+# 加载数据集
+train_dataset = IMDBDataset(
+    root="data/imdb",
+    tokenizer=tokenizer,
+    max_len=200,
+    train=True,
+    from_csv=True,
+    use_cache=True
+)
+
+# 获取样本
+input_ids, label = train_dataset[0]
+print("Input shape:", input_ids.shape)
+print("Label:", label)
+tokenizer.print_vocab(limit=10000)
