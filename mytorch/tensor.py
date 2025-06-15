@@ -1,33 +1,12 @@
-from mytorch.backend import xp
+from .grad import is_grad_enabled
+from .backend import xp
 from .ops.function import Function, Context
 from .ops.basic import *
 from .ops.advanced import *
-from .utils import ensure_tensor
-
-from contextlib import contextmanager
-
-_grad_enabled = True
 
 
-def is_grad_enabled():
-    """
-    Check if gradient tracking is enabled.
-    """
-    return _grad_enabled
-
-
-@contextmanager
-def no_grad():
-    """
-    Context manager to disable gradient tracking.
-    """
-    global _grad_enabled
-    prev_state = _grad_enabled
-    _grad_enabled = False
-    try:
-        yield
-    finally:
-        _grad_enabled = prev_state
+def ensure_tensor(x):
+    return x if isinstance(x, Tensor) else Tensor(x)
 
 
 class Tensor:

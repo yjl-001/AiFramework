@@ -2,9 +2,12 @@ from mytorch.tensor import Tensor
 from mytorch.nn.module import Module
 from mytorch.nn.linear import Linear
 from mytorch.opt import Optimizer, Adam
-from mytorch.dataset import DataLoader, MNISTDataset
-from mytorch import no_grad
+from mytorch.utils.dataset import DataLoader, MNISTDataset
+from mytorch.grad import no_grad
 from mytorch.nn.loss import cross_entropy_loss
+from mytorch.backend import xp, set_backend
+
+set_backend("cpu")
 
 
 class MLP(Module):

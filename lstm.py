@@ -3,6 +3,22 @@ from mytorch.tensor import Tensor
 from mytorch.backend import xp
 
 
+class Embedding(Module):
+    def __init__(self, num_embeddings, embedding_dim):
+        super().__init__()
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
+
+        self.weight = Tensor(
+            xp.random.randn(num_embeddings, embedding_dim) * 0.01
+        )
+
+    def forward(self, x: Tensor):
+        # x: (batch_size, seq_len) -> int 类型的索引
+        # 返回: (batch_size, seq_len, embedding_dim)
+        return self.weight[x.data]
+
+
 class LSTMCell(Module):
     def __init__(self, input_size, hidden_size):
         super().__init__()

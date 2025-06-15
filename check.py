@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from mytorch.dataset import MNISTDataset
+from mytorch.data import MNISTDataset
 from mytorch.backend import xp
 
 

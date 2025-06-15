@@ -37,7 +37,8 @@ class GetItem(Function):
     def backward(ctx: Context, grad_output):
         (x,) = ctx.saved_tensors
         grad = xp.zeros_like(x.data, dtype=xp.float32)
-        grad[ctx.idx] = grad_output
+        # grad[ctx.idx] = grad_output
+        xp.add.at(grad, ctx.idx, grad_output) # 修复重复索引的梯度错误
         return grad, None
 
 
