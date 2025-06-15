@@ -1,3 +1,0 @@
-numpy>=1.20.0
-# Add other dependencies here if needed, e.g., for specific BLEU score libraries or plotting
-# nltk  # For more advanced BLEU score or other NLP utilities, if used
