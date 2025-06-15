@@ -14,7 +14,7 @@ def unbroadcast(grad, target_shape):
     return grad
 
 
-class GetItem(Function):
+class GetItemFunction(Function):
     @staticmethod
     def forward(ctx: Context, x, idx):
         from ..tensor import Tensor
@@ -50,7 +50,7 @@ class GetItem(Function):
             return grad, None
 
 
-class Where(Function):
+class WhereFunction(Function):
     @staticmethod
     def forward(ctx: Context, condition, x, y):
         ctx.save_for_backward(condition, x, y)
@@ -70,7 +70,7 @@ class Where(Function):
         return None, grad_x, grad_y  # condition 不可导
 
 
-class LogSoftmax(Function):
+class LogSoftmaxFunction(Function):
     @staticmethod
     def forward(ctx: Context, x, dim):
         ctx.dim = dim
@@ -93,7 +93,7 @@ class LogSoftmax(Function):
         return grad_input, None
 
 
-class Chunk(Function):
+class ChunkFunction(Function):
     @staticmethod
     def forward(ctx: Context, x, *, index, chunks, dim):
         ctx.index = index
@@ -119,7 +119,7 @@ class Chunk(Function):
         return xp.concatenate(grads, axis=dim), None, None, None
 
 
-class Stack(Function):
+class StackFunction(Function):
     @staticmethod
     def forward(ctx: Context, tensors, dim):
         ctx.dim = dim

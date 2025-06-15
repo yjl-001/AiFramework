@@ -75,6 +75,10 @@ class Module:
         state = self.state_dict()
         # 只保存 param.data，避免保存 Tensor 对象本身
         to_save = {k: v.data for k, v in state.items()}
+        # 确保文件路径的目录存在
+        import os
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        # 使用 pickle 保存数据
         with open(file_path, 'wb') as f:
             pickle.dump(to_save, f)
         print(f"Model saved to {file_path}")

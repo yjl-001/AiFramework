@@ -175,7 +175,7 @@ def main():
         print(f"Val Loss: {val_loss:.4f} | Accuracy: {val_acc:.4f}")
 
     # 模型保存（可选）
-    model.save("sentiment_lstm_model.pt")
+    model.save("result/sentiment_lstm_model.pt")
     print("Model saved to sentiment_lstm_model.pt")
 
 

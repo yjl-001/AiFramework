@@ -11,7 +11,7 @@ def unbroadcast(grad, target_shape):
     return grad
 
 
-class Neg(Function):
+class NegFunction(Function):
     @staticmethod
     def forward(ctx: Context, x):
         ctx.save_for_backward(x)
@@ -22,7 +22,7 @@ class Neg(Function):
         return -grad_output
 
 
-class Add(Function):
+class AddFunction(Function):
     op = '+'
 
     @staticmethod
@@ -38,7 +38,7 @@ class Add(Function):
         return grad_a, grad_b
 
 
-class Sub(Function):
+class SubFunction(Function):
     op = '-'
 
     @staticmethod
@@ -54,7 +54,7 @@ class Sub(Function):
         return grad_a, grad_b
 
 
-class Mul(Function):
+class MulFunction(Function):
     op = '*'
 
     @staticmethod
@@ -70,7 +70,7 @@ class Mul(Function):
         return grad_a, grad_b
 
 
-class Div(Function):
+class DivFunction(Function):
     op = '/'
 
     @staticmethod
@@ -84,7 +84,7 @@ class Div(Function):
         return grad_output / b.data, -grad_output * a.data / (b.data ** 2)
 
 
-class MatMul(Function):
+class MatMulFunction(Function):
     op = '@'
 
     @staticmethod
@@ -102,7 +102,7 @@ class MatMul(Function):
         return grad_a, grad_b
 
 
-class Pow(Function):
+class PowFunction(Function):
     op = 'pow'
 
     @staticmethod
@@ -120,7 +120,7 @@ class Pow(Function):
         return grad_a, grad_b
 
 
-class Sqrt(Function):
+class SqrtFunction(Function):
     op = 'sqrt'
 
     @staticmethod
@@ -136,7 +136,7 @@ class Sqrt(Function):
         return grad_output * 0.5 / xp.sqrt(a.data)
 
 
-class Exp(Function):
+class ExpFunction(Function):
     op = 'exp'
 
     @staticmethod
@@ -151,7 +151,7 @@ class Exp(Function):
         return grad_output * ctx.out
 
 
-class Log(Function):
+class LogFunction(Function):
     op = 'log'
 
     @staticmethod
@@ -165,7 +165,7 @@ class Log(Function):
         return grad_output / a.data
 
 
-class Abs(Function):
+class AbsFunction(Function):
     op = 'abs'
 
     @staticmethod
@@ -179,7 +179,7 @@ class Abs(Function):
         return grad_output * xp.sign(a.data)
 
 
-class Tanh(Function):
+class TanhFunction(Function):
     op = 'tanh'
 
     @staticmethod
@@ -193,7 +193,7 @@ class Tanh(Function):
         return grad_output * (1 - ctx.out ** 2)
 
 
-class Sum(Function):
+class SumFunction(Function):
     op = 'sum'
 
     @staticmethod
@@ -213,7 +213,7 @@ class Sum(Function):
         return grad_output * xp.ones_like(a.data)
 
 
-class Mean(Function):
+class MeanFunction(Function):
     op = 'mean'
 
     @staticmethod
@@ -228,7 +228,7 @@ class Mean(Function):
         return grad_output * xp.ones(shape, dtype=xp.float32) / xp.prod(xp.array(shape))
 
 
-class Max(Function):
+class MaxFunction(Function):
     op = 'max'
 
     @staticmethod
@@ -253,7 +253,7 @@ class Max(Function):
         return grad_output * mask / count
 
 
-class Min(Function):
+class MinFunction(Function):
     op = 'min'
 
     @staticmethod
@@ -278,7 +278,7 @@ class Min(Function):
         return grad_output * mask / count
 
 
-class ArgMax(Function):
+class ArgMaxFunction(Function):
     op = 'argmax'
 
     @staticmethod
@@ -291,7 +291,7 @@ class ArgMax(Function):
         return None, None
 
 
-class ArgMin(Function):
+class ArgMinFunction(Function):
     op = 'argmin'
 
     @staticmethod
@@ -304,7 +304,7 @@ class ArgMin(Function):
         return None, None
 
 
-class Reshape(Function):
+class ReshapeFunction(Function):
     op = 'reshape'
 
     @staticmethod
@@ -318,7 +318,7 @@ class Reshape(Function):
         return grad_output.reshape(ctx.original_shape), None
 
 
-class Transpose(Function):
+class TransposeFunction(Function):
     op = 'transpose'
 
     @staticmethod
@@ -333,7 +333,7 @@ class Transpose(Function):
         return xp.transpose(grad_output, reverse_axes), None
 
 
-class Flatten(Function):
+class FlattenFunction(Function):
     op = 'flatten'
 
     @staticmethod
@@ -347,7 +347,7 @@ class Flatten(Function):
         return grad_output.reshape(ctx.original_shape)
 
 
-class Clip(Function):
+class ClipFunction(Function):
     op = 'clip'
 
     @staticmethod
@@ -366,7 +366,7 @@ class Clip(Function):
 
 
 # Comparison ops (no gradient)
-class Equal(Function):
+class EqualFunction(Function):
     op = '=='
 
     @staticmethod
@@ -378,7 +378,7 @@ class Equal(Function):
         return None, None
 
 
-class NotEqual(Function):
+class NotEqualFunction(Function):
     op = '!='
 
     @staticmethod
@@ -390,7 +390,7 @@ class NotEqual(Function):
         return None, None
 
 
-class Less(Function):
+class LessFunction(Function):
     op = '<'
 
     @staticmethod
@@ -402,7 +402,7 @@ class Less(Function):
         return None, None
 
 
-class LessEqual(Function):
+class LessEqualFunction(Function):
     op = '<='
 
     @staticmethod
@@ -414,7 +414,7 @@ class LessEqual(Function):
         return None, None
 
 
-class Greater(Function):
+class GreaterFunction(Function):
     op = '>'
 
     @staticmethod
@@ -426,7 +426,7 @@ class Greater(Function):
         return None, None
 
 
-class GreaterEqual(Function):
+class GreaterEqualFunction(Function):
     op = '>='
 
     @staticmethod

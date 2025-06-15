@@ -150,95 +150,95 @@ class Tensor:
                         inp.grad = add_grad(inp.grad, g)
 
     def __getitem__(self, idx):
-        return GetItem.apply(self, idx)
+        return GetItemFunction.apply(self, idx)
 
     def __neg__(self):
-        return Neg.apply(self)
+        return NegFunction.apply(self)
 
     def __add__(self, other):
-        return Add.apply(self, ensure_tensor(other))
+        return AddFunction.apply(self, ensure_tensor(other))
 
     def __radd__(self, other):
         return self + other
 
     def __sub__(self, other):
-        return Sub.apply(self, ensure_tensor(other))
+        return SubFunction.apply(self, ensure_tensor(other))
 
     def __rsub__(self, other):
         return ensure_tensor(other) - self
 
     def __mul__(self, other):
-        return Mul.apply(self, ensure_tensor(other))
+        return MulFunction.apply(self, ensure_tensor(other))
 
     def __rmul__(self, other):
         return self * other
 
     def __matmul__(self, other):
-        return MatMul.apply(self, ensure_tensor(other))
+        return MatMulFunction.apply(self, ensure_tensor(other))
 
     def __truediv__(self, other):
-        return Div.apply(self, ensure_tensor(other))
+        return DivFunction.apply(self, ensure_tensor(other))
 
     def __rtruediv__(self, other):
         return ensure_tensor(other) / self
 
     def __pow__(self, power):
-        return Pow.apply(self, ensure_tensor(power))
+        return PowFunction.apply(self, ensure_tensor(power))
 
     def __rpow__(self, base):
-        return Pow.apply(ensure_tensor(base), self)
+        return PowFunction.apply(ensure_tensor(base), self)
 
     def __eq__(self, other):
-        return Equal.apply(self, ensure_tensor(other))
+        return EqualFunction.apply(self, ensure_tensor(other))
 
     def __ne__(self, other):
-        return NotEqual.apply(self, ensure_tensor(other))
+        return NotEqualFunction.apply(self, ensure_tensor(other))
 
     def __lt__(self, other):
-        return Less.apply(self, ensure_tensor(other))
+        return LessFunction.apply(self, ensure_tensor(other))
 
     def __le__(self, other):
-        return LessEqual.apply(self, ensure_tensor(other))
+        return LessEqualFunction.apply(self, ensure_tensor(other))
 
     def __gt__(self, other):
-        return Greater.apply(self, ensure_tensor(other))
+        return GreaterFunction.apply(self, ensure_tensor(other))
 
     def __ge__(self, other):
-        return GreaterEqual.apply(self, ensure_tensor(other))
+        return GreaterEqualFunction.apply(self, ensure_tensor(other))
 
     def exp(self):
-        return Exp.apply(self)
+        return ExpFunction.apply(self)
 
     def sqrt(self):
-        return Sqrt.apply(self)
+        return SqrtFunction.apply(self)
 
     def log(self):
-        return Log.apply(self)
+        return LogFunction.apply(self)
 
     def sum(self, axis=None, keepdims=False):
-        return Sum.apply(self, axis=axis, keepdims=keepdims)
+        return SumFunction.apply(self, axis=axis, keepdims=keepdims)
 
     def abs(self):
-        return Abs.apply(self)
+        return AbsFunction.apply(self)
 
     def max(self, axis=None, keepdims=False):
-        return Max.apply(self, axis=axis, keepdims=keepdims)
+        return MaxFunction.apply(self, axis=axis, keepdims=keepdims)
 
     def min(self, axis=None, keepdims=False):
-        return Min.apply(self, axis=axis, keepdims=keepdims)
+        return MinFunction.apply(self, axis=axis, keepdims=keepdims)
 
     def argmax(self, axis=None, dim=None):
         if dim is not None:
             axis = dim
-        return ArgMax.apply(self, axis)
+        return ArgMaxFunction.apply(self, axis)
 
     def argmin(self, axis=None, dim=None):
         if dim is not None:
             axis = dim
-        return ArgMin.apply(self, axis)
+        return ArgMinFunction.apply(self, axis)
 
     def mean(self):
-        return Mean.apply(self)
+        return MeanFunction.apply(self)
 
     def relu(self):
         return ReLU.apply(self)
@@ -247,7 +247,7 @@ class Tensor:
         return Sigmoid.apply(self)
 
     def tanh(self):
-        return Tanh.apply(self)
+        return TanhFunction.apply(self)
 
     def leaky_relu(self, negative_slope=0.01):
         return LeakyReLU.apply(self, negative_slope)
@@ -256,30 +256,30 @@ class Tensor:
         return ELU.apply(self, alpha)
 
     def log_softmax(self, dim):
-        return LogSoftmax.apply(self, dim)
+        return LogSoftmaxFunction.apply(self, dim)
 
     def tanh(self):
-        return Tanh.apply(self)
+        return TanhFunction.apply(self)
 
     def reshape(self, shape):
-        return Reshape.apply(self, shape)
+        return ReshapeFunction.apply(self, shape)
 
     def transpose(self, axes):
-        return Transpose.apply(self, axes)
+        return TransposeFunction.apply(self, axes)
 
     def flatten(self):
-        return Flatten.apply(self)
+        return FlattenFunction.apply(self)
 
     def clip(self, min_val, max_val):
-        return Clip.apply(self, min_val, max_val)
+        return ClipFunction.apply(self, min_val, max_val)
 
     def chunk(self, chunks, dim=0):
-        return tuple(Chunk.apply(self, index=i, chunks=chunks, dim=dim) for i in range(chunks))
+        return tuple(ChunkFunction.apply(self, index=i, chunks=chunks, dim=dim) for i in range(chunks))
 
     @staticmethod
     def stack(tensors, dim=0):
-        return Stack.apply(tensors, dim)
+        return StackFunction.apply(tensors, dim)
 
     @staticmethod
     def where(condition, x, y):
-        return Where.apply(ensure_tensor(condition), ensure_tensor(x), ensure_tensor(y))
+        return WhereFunction.apply(ensure_tensor(condition), ensure_tensor(x), ensure_tensor(y))
