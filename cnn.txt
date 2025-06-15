@@ -1,0 +1,105 @@
+Epoch 1 | Batch 0 | Loss: 20.7221
+Epoch 1 | Batch 100 | Loss: 13.3597
+Epoch 1 | Batch 200 | Loss: 6.9795
+Epoch 1 | Batch 300 | Loss: 7.4836
+Epoch 1 | Batch 400 | Loss: 3.6502
+Epoch 1 | Batch 500 | Loss: 5.9107
+Epoch 1 | Batch 600 | Loss: 6.8836
+Epoch 1 | Batch 700 | Loss: 4.8627
+Epoch 1 | Batch 800 | Loss: 4.7832
+Epoch 1 | Batch 900 | Loss: 5.0563
+Epoch 1 | Batch 1000 | Loss: 3.4340
+Epoch 1 | Batch 1100 | Loss: 4.2105
+Epoch 1 | Batch 1200 | Loss: 2.1439
+Epoch 1 | Batch 1300 | Loss: 4.8980
+Epoch 1 | Batch 1400 | Loss: 5.6030
+Epoch 1 | Batch 1500 | Loss: 5.3004
+Epoch 1 | Batch 1600 | Loss: 2.8816
+Epoch 1 | Batch 1700 | Loss: 6.6543
+Epoch 1 | Batch 1800 | Loss: 0.6476
+Epoch 1 Summary: Loss = 5.6470, Accuracy = 0.6718
+Test Accuracy: 0.8081
+Epoch 2 | Batch 0 | Loss: 4.1699
+Epoch 2 | Batch 100 | Loss: 3.2036
+Epoch 2 | Batch 200 | Loss: 3.5152
+Epoch 2 | Batch 300 | Loss: 5.1808
+Epoch 2 | Batch 400 | Loss: 1.3919
+Epoch 2 | Batch 500 | Loss: 4.1921
+Epoch 2 | Batch 600 | Loss: 3.6354
+Epoch 2 | Batch 700 | Loss: 4.5332
+Epoch 2 | Batch 800 | Loss: 4.5332
+Epoch 2 | Batch 900 | Loss: 3.2380
+Epoch 2 | Batch 1000 | Loss: 3.2380
+Epoch 2 | Batch 1100 | Loss: 3.5773
+Epoch 2 | Batch 1200 | Loss: 2.2715
+Epoch 2 | Batch 1300 | Loss: 3.8844
+Epoch 2 | Batch 1400 | Loss: 3.2635
+Epoch 2 | Batch 1500 | Loss: 3.2370
+Epoch 2 | Batch 1600 | Loss: 1.2952
+Epoch 2 | Batch 1700 | Loss: 4.5209
+Epoch 2 | Batch 1800 | Loss: 5.2438
+Epoch 2 Summary: Loss = 3.4800, Accuracy = 0.8218
+Test Accuracy: 0.8311
+Epoch 3 | Batch 0 | Loss: 3.2380
+Epoch 3 | Batch 100 | Loss: 5.8284
+Epoch 3 | Batch 200 | Loss: 1.9428
+Epoch 3 | Batch 300 | Loss: 4.5332
+Epoch 3 | Batch 400 | Loss: 0.6478
+Epoch 3 | Batch 500 | Loss: 5.8284
+Epoch 3 | Batch 600 | Loss: 5.8284
+Epoch 3 | Batch 700 | Loss: 3.2380
+Epoch 3 | Batch 800 | Loss: 4.5332
+Epoch 3 | Batch 900 | Loss: 4.0920
+Epoch 3 | Batch 1000 | Loss: 3.6774
+Epoch 3 | Batch 1100 | Loss: 5.8284
+Epoch 3 | Batch 1200 | Loss: 2.5904
+Epoch 3 | Batch 1300 | Loss: 3.2380
+Epoch 3 | Batch 1400 | Loss: 1.9428
+Epoch 3 | Batch 1500 | Loss: 3.1601
+Epoch 3 | Batch 1600 | Loss: 3.8856
+Epoch 3 | Batch 1700 | Loss: 1.2952
+Epoch 3 | Batch 1800 | Loss: 2.5904
+Epoch 3 Summary: Loss = 3.2825, Accuracy = 0.8374
+Test Accuracy: 0.8393
+Epoch 4 | Batch 0 | Loss: 6.4760
+Epoch 4 | Batch 100 | Loss: 3.2380
+Epoch 4 | Batch 200 | Loss: 4.5332
+Epoch 4 | Batch 300 | Loss: 5.7865
+Epoch 4 | Batch 400 | Loss: 4.5332
+Epoch 4 | Batch 500 | Loss: 1.9428
+Epoch 4 | Batch 600 | Loss: 4.7657
+Epoch 4 | Batch 700 | Loss: 2.5911
+Epoch 4 | Batch 800 | Loss: 1.2952
+Epoch 4 | Batch 900 | Loss: 1.2952
+Epoch 4 | Batch 1000 | Loss: 3.2381
+Epoch 4 | Batch 1100 | Loss: 2.5904
+Epoch 4 | Batch 1200 | Loss: 4.5331
+Epoch 4 | Batch 1300 | Loss: 4.5332
+Epoch 4 | Batch 1400 | Loss: 2.5301
+Epoch 4 | Batch 1500 | Loss: 3.8856
+Epoch 4 | Batch 1600 | Loss: 1.9415
+Epoch 4 | Batch 1700 | Loss: 0.6476
+Epoch 4 | Batch 1800 | Loss: 2.5904
+Epoch 4 Summary: Loss = 3.2153, Accuracy = 0.8428
+Test Accuracy: 0.8569
+Epoch 5 | Batch 0 | Loss: 5.1788
+Epoch 5 | Batch 100 | Loss: 5.0218
+Epoch 5 | Batch 200 | Loss: 2.5904
+Epoch 5 | Batch 300 | Loss: 2.5904
+Epoch 5 | Batch 400 | Loss: 3.8856
+Epoch 5 | Batch 500 | Loss: 3.2380
+Epoch 5 | Batch 600 | Loss: 3.8856
+Epoch 5 | Batch 700 | Loss: 2.5904
+Epoch 5 | Batch 800 | Loss: 1.9428
+Epoch 5 | Batch 900 | Loss: 2.5904
+Epoch 5 | Batch 1000 | Loss: 5.1808
+Epoch 5 | Batch 1100 | Loss: 3.2380
+Epoch 5 | Batch 1200 | Loss: 4.5332
+Epoch 5 | Batch 1300 | Loss: 1.9428
+Epoch 5 | Batch 1400 | Loss: 3.8856
+Epoch 5 | Batch 1500 | Loss: 1.9428
+Epoch 5 | Batch 1600 | Loss: 3.8856
+Epoch 5 | Batch 1700 | Loss: 2.8065
+Epoch 5 | Batch 1800 | Loss: 2.5904
+Epoch 5 Summary: Loss = 3.2084, Accuracy = 0.8438
+Test Accuracy: 0.8551
