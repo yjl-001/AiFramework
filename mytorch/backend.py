@@ -22,41 +22,23 @@ def set_cupy_cache_dir(preferred_path='D:/Temp/cupy_cache'):
         print(
             f"✅ No Chinese characters detected in current cache path: {current_tmp}. No change needed.")
 
+cpu_only = os.getenv('MYTORCH_CPU_ONLY', '1') == '1'
 
-try:
-    import cupy as cp
-    cp.array([1])
-    xp = cp
-    use_gpu = True
-    print("✅ CuPy (GPU) is available, using it as backend by default.")
-    set_cupy_cache_dir()
-except Exception:
+if cpu_only:
     import numpy as np
     xp = np
     use_gpu = False
-    print("⚠️  CuPy (GPU) is not available, using NumPy (CPU) instead.")
-
-
-def set_backend(backend):
-    global xp, use_gpu
-    if backend == 'gpu':
-        if use_gpu:
-            return
-        try:
-            import cupy as cp
-            cp.array([1])
-            xp = cp
-            use_gpu = True
-            print("✅ Switched to CuPy (GPU) backend")
-            set_cupy_cache_dir()
-        except Exception:
-            raise ImportError("CuPy is not installed or GPU is not available.")
-    elif backend == 'cpu':
-        if not use_gpu:
-            return
+    print("⚠️  MYTORCH_CPU_ONLY is set, using NumPy (CPU) as backend.")
+else:
+    try:
+        import cupy as cp
+        cp.array([1])
+        xp = cp
+        use_gpu = True
+        print("✅ CuPy (GPU) is available, using it as backend by default.")
+        set_cupy_cache_dir()
+    except Exception:
         import numpy as np
         xp = np
         use_gpu = False
-        print("⚠️  Switched to NumPy (CPU) backend")
-    else:
-        raise ValueError("Unsupported backend. Use 'cpu' or 'gpu'.")
+        print("⚠️  CuPy (GPU) is not available, using NumPy (CPU) instead.")

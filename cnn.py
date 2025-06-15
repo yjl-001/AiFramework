@@ -1,12 +1,9 @@
-from mytorch.tensor import Tensor
-from mytorch.nn import Module, Conv2d, MaxPool2d, Linear
-from mytorch.opt import Adam
-from mytorch.utils.dataset import DataLoader, MNISTDataset
-from mytorch.grad import no_grad
 from mytorch.nn.loss import cross_entropy_loss
-from mytorch.backend import set_backend
-
-set_backend("cpu")
+from mytorch.grad import no_grad
+from mytorch.utils.dataset import DataLoader, MNISTDataset
+from mytorch.opt import Adam
+from mytorch.nn import Module, Conv2d, MaxPool2d, Linear
+from mytorch.tensor import Tensor
 
 
 class SimpleCNN(Module):

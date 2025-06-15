@@ -92,17 +92,16 @@ class Tensor:
             cloned_tensor.grad = self.grad.copy()
         return cloned_tensor
 
-    def zeros(self, shape=None):
-        if shape is None:
-            shape = self.data.shape
-        return Tensor(xp.zeros(shape, dtype=self.dtype), frozen=self.frozen)
-
     def numpy(self):
         return self.data.copy()
 
     def zero_grad(self):
         if self.grad is not None:
             self.grad.fill(0)
+
+    @classmethod
+    def zeros(cls, shape=()):
+        return Tensor(xp.zeros(shape, dtype=xp.float32))
 
     @classmethod
     def zeros_like(cls, other):

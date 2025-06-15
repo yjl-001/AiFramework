@@ -199,13 +199,12 @@ class Sigmoid(Function):
     @staticmethod
     def forward(ctx: Context, a):
         out = 1 / (1 + xp.exp(-a.data))
-        ctx.save_for_backward(out)
+        ctx.out = out
         return out
 
     @staticmethod
     def backward(ctx: Context, grad_output):
-        (out,) = ctx.saved_tensors
-        return grad_output * out * (1 - out)
+        return grad_output * ctx.out * (1 - ctx.out)
 
 
 class Tanh(Function):
@@ -214,13 +213,12 @@ class Tanh(Function):
     @staticmethod
     def forward(ctx: Context, a):
         out = xp.tanh(a.data)
-        ctx.save_for_backward(out)
+        ctx.out = out
         return out
 
     @staticmethod
     def backward(ctx: Context, grad_output):
-        (out,) = ctx.saved_tensors
-        return grad_output * (1 - out ** 2)
+        return grad_output * (1 - ctx.out ** 2)
 
 
 class Sum(Function):

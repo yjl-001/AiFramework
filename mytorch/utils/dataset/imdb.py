@@ -1,5 +1,7 @@
 import os
 import csv
+import json
+import hashlib
 from mytorch.backend import xp
 
 
@@ -15,40 +17,52 @@ class IMDBDataset:
         if self.from_csv:
             self._load_data()
         else:
-            raise NotImplementedError("目前仅支持 CSV 格式")
+            raise NotImplementedError("Only CSV format is currently supported")
 
     def _load_data(self):
-        # 文件名
         csv_filename = "imdb_train.csv" if self.train else "imdb_test.csv"
         csv_path = os.path.join(self.root, csv_filename)
 
-        # 缓存文件名
-        cache_filename = "imdb_train.npz" if self.train else "imdb_test.npz"
+        # ==== ✅ Generate a unique cache filename ====
+        config = {
+            "train": self.train,
+            "max_len": self.max_len,
+            "vocab_size": self.tokenizer.max_vocab_size,
+            "min_freq": self.tokenizer.min_freq,
+            "pad_token": self.tokenizer.pad_token,
+            "unk_token": self.tokenizer.unk_token,
+        }
+
+        # Generate a unique identifier using a hash
+        config_str = json.dumps(config, sort_keys=True)
+        config_hash = hashlib.md5(config_str.encode('utf-8')).hexdigest()[:8]
+
+        cache_filename = f"imdb_{'train' if self.train else 'test'}_{config_hash}.npz"
         cache_path = os.path.join(self.root, cache_filename)
 
-        # 如果启用缓存并且缓存文件存在，直接加载
+        # ==== ✅ Load from cache if available ====
         if self.use_cache and os.path.exists(cache_path):
-            print(f"📦 正在从缓存加载数据: {cache_path}")
+            print(f"📦 Loading data from cache: {cache_path}")
             data = xp.load(cache_path, allow_pickle=True)
             self.input_ids = data['input_ids']
             self.labels = data['labels']
-            print(f"✅ 加载完成: {len(self.labels)} 个样本")
+            print(f"✅ Loaded: {len(self.labels)} samples")
             return
 
-        # 否则从 CSV 加载
+        # ==== ✅ Load data from CSV ====
         if not os.path.exists(csv_path):
-            raise FileNotFoundError(f"找不到文件: {csv_path}")
+            raise FileNotFoundError(f"File not found: {csv_path}")
 
-        print(f"📂 正在从 CSV 加载数据: {csv_path}")
+        print(f"📂 Loading data from CSV: {csv_path}")
         input_ids = []
         labels = []
 
         with open(csv_path, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
-            next(reader)  # 跳过表头
+            next(reader)  # Skip header
             for row in reader:
-                text = row[2]  # 第3列是 review
-                label_str = row[3].strip().lower()  # 第4列是 label
+                text = row[2]  # Third column is the review
+                label_str = row[3].strip().lower()
                 label = 1 if label_str == 'pos' else 0
 
                 ids = self.tokenizer.encode(text, self.max_len)
@@ -58,14 +72,14 @@ class IMDBDataset:
         self.input_ids = xp.stack(input_ids)
         self.labels = xp.array(labels, dtype=xp.int32)
 
-        print(f"✅ 加载完成: {len(self.labels)} 个样本")
+        print(f"✅ Loaded: {len(self.labels)} samples")
 
-        # 保存为缓存文件
+        # ==== ✅ Save to cache ====
         if self.use_cache:
-            print(f"💾 正在保存缓存文件: {cache_path}")
+            print(f"💾 Saving cache file: {cache_path}")
             xp.savez_compressed(
                 cache_path, input_ids=self.input_ids, labels=self.labels)
-            print("✅ 缓存保存完成")
+            print("✅ Cache saved")
 
     def __len__(self):
         return len(self.labels)

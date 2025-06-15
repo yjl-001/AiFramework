@@ -11,3 +11,4 @@ CNN/result/
 *.npy
 __pycache__
 data/
+results

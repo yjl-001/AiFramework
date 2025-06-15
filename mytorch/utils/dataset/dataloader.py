@@ -23,7 +23,6 @@ class DataLoader:
                                      self.current_idx + self.batch_size]
         batch_data = [self.dataset[i] for i in batch_indices]
 
-        # 拆分数据和标签
         data_batch, label_batch = zip(*batch_data)
 
         self.current_idx += self.batch_size

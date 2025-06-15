@@ -2,9 +2,6 @@ from .function import Function, Context
 from mytorch.backend import xp
 
 
-from mytorch.backend import xp
-
-
 def im2col(x, KH, KW, SH, SW, PH, PW):
     N, C, H, W = x.shape
     H_out = (H + 2 * PH - KH) // SH + 1
